@@ -1,0 +1,44 @@
+[
+  {
+    "title": "Two Sum",
+    "topic": "Arrays",
+    "difficulty": "Easy",
+    "description": "Given an array of integers nums and an integer target, return indices of the two numbers such that they add up to target. You may assume that each input would have exactly one solution, and you may not use the same element twice."
+  },
+  {
+    "title": "Merge Intervals",
+    "topic": "Arrays",
+    "difficulty": "Medium",
+    "description": "Given an array of intervals where intervals[i] = [starti, endi], merge all overlapping intervals, and return an array of the non-overlapping intervals that cover all the intervals in the input."
+  },
+  {
+    "title": "Reverse Linked List",
+    "topic": "Linked List",
+    "difficulty": "Easy",
+    "description": "Given the head of a singly linked list, reverse the list, and return the reversed list."
+  },
+  {
+    "title": "LRU Cache",
+    "topic": "Linked List",
+    "difficulty": "Medium",
+    "description": "Design a data structure that follows the constraints of a Least Recently Used (LRU) cache. Implement the LRUCache class."
+  },
+  {
+    "title": "Binary Search",
+    "topic": "Binary Search",
+    "difficulty": "Easy",
+    "description": "Given an array of integers nums which is sorted in ascending order, and an integer target, write a function to search target in nums. If target exists, then return its index. Otherwise, return -1."
+  },
+  {
+    "title": "Number of Islands",
+    "topic": "Graphs",
+    "difficulty": "Medium",
+    "description": "Given an m x n 2D binary grid grid which represents a map of '1's (land) and '0's (water), return the number of islands. An island is surrounded by water and is formed by connecting adjacent lands horizontally or vertically."
+  },
+  {
+    "title": "Climbing Stairs",
+    "topic": "Dynamic Programming",
+    "difficulty": "Easy",
+    "description": "You are climbing a staircase. It takes n steps to reach the top. Each time you can either climb 1 or 2 steps. In how many distinct ways can you climb to the top?"
+  }
+]
