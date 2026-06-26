@@ -22,6 +22,8 @@ const allowedOrigin = (origin, callback) => {
   const normalizedOrigin = origin.replace(/\/$/, '');
   const targetFrontend = process.env.FRONTEND_URL ? process.env.FRONTEND_URL.replace(/\/$/, '') : null;
 
+  console.log(`[CORS Request] Origin: "${origin}" (Normalized: "${normalizedOrigin}"), Expected FRONTEND_URL: "${process.env.FRONTEND_URL}" (Normalized: "${targetFrontend}")`);
+
   if (targetFrontend && normalizedOrigin === targetFrontend) {
     return callback(null, true);
   }
@@ -29,6 +31,7 @@ const allowedOrigin = (origin, callback) => {
   if (/^http:\/\/localhost:(517[3-9]|518[0-9])$/.test(normalizedOrigin)) {
     return callback(null, true);
   }
+  console.warn(`[CORS Blocked] Origin "${origin}" does not match FRONTEND_URL or localhost`);
   callback(new Error(`CORS: origin ${origin} not allowed`));
 };
 
