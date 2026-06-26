@@ -323,12 +323,31 @@ export default function Room() {
     };
 
     const onSignal = (signalData) => {
-      let peer = peerRef.current;
+      const peer = peerRef.current;
       if (!peer) {
-        peer = initiatePeer(false);
+        if (signalData.type === 'offer') {
+          const newPeer = initiatePeer(false);
+          if (newPeer) {
+            try {
+              newPeer.signal(signalData);
+            } catch (err) {
+              console.error('Error signaling new peer:', err);
+            }
+          }
+        }
+        return;
       }
-      if (peer) {
+
+      const pc = peer._pc;
+      const signalingState = pc ? pc.signalingState : null;
+
+      if (peer.destroyed || peer.connected) return;
+      if (signalingState === 'stable') return;
+
+      try {
         peer.signal(signalData);
+      } catch (err) {
+        console.error('Error signaling existing peer:', err);
       }
     };
 
