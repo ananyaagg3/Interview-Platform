@@ -74,6 +74,7 @@ export default function Room() {
   const isRemoteChange = useRef(false);
   const roomFetched = useRef(false);
   const localStreamRef = useRef(null); // Ref to avoid stale closures
+  const iceServersRef = useRef([{ urls: "stun:stun.l.google.com:19302" }]);
   
   // WebRTC Refs
   const peerRef = useRef(null);
@@ -124,7 +125,11 @@ export default function Room() {
 
   // WebRTC Peer connection helper
   const initiatePeer = useCallback((initiator) => {
-    if (!localStream) return null;
+    const currentStream = localStreamRef.current;
+    if (!currentStream) {
+      console.warn("initiatePeer called but localStreamRef.current is null");
+      return null;
+    }
     console.log(`Initiating WebRTC Peer. Initiator: ${initiator}`);
 
     if (peerRef.current) {
@@ -134,8 +139,8 @@ export default function Room() {
     const peer = new Peer({
       initiator,
       trickle: false,
-      config: { iceServers },
-      stream: localStream
+      config: { iceServers: iceServersRef.current },
+      stream: currentStream
     });
 
     peer.on('signal', (data) => {
@@ -150,19 +155,27 @@ export default function Room() {
 
     peer.on('close', () => {
       console.log('Peer closed connection');
+      peer.destroy();
+      if (peerRef.current === peer) {
+        peerRef.current = null;
+      }
       setRemoteStream(null);
       setVideoStatus('reconnecting');
     });
 
     peer.on('error', (err) => {
       console.error('Peer connection error:', err);
+      peer.destroy();
+      if (peerRef.current === peer) {
+        peerRef.current = null;
+      }
       setRemoteStream(null);
       setVideoStatus('reconnecting');
     });
 
     peerRef.current = peer;
     return peer;
-  }, [localStream, iceServers, roomId]);
+  }, [roomId]);
 
   // Pre-session check stream acquisition and mic volume tracking
   useEffect(() => {
@@ -240,6 +253,11 @@ export default function Room() {
   useEffect(() => {
     localStreamRef.current = localStream;
   }, [localStream]);
+
+  // Keep iceServersRef in sync with state
+  useEffect(() => {
+    iceServersRef.current = iceServers;
+  }, [iceServers]);
 
   // Main Socket room joining and event handling after Pre-session join clicked
   useEffect(() => {
