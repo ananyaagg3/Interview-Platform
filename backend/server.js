@@ -20,7 +20,15 @@ const allowedOrigin = (origin, callback) => {
   if (!origin) return callback(null, true); // allow non-browser requests (curl, etc.)
   
   const normalizedOrigin = origin.replace(/\/$/, '');
-  const targetFrontend = process.env.FRONTEND_URL ? process.env.FRONTEND_URL.replace(/\/$/, '') : null;
+  
+  let targetFrontend = null;
+  if (process.env.FRONTEND_URL) {
+    try {
+      targetFrontend = new URL(process.env.FRONTEND_URL).origin;
+    } catch (e) {
+      targetFrontend = process.env.FRONTEND_URL.replace(/\/$/, '');
+    }
+  }
 
   console.log(`[CORS Request] Origin: "${origin}" (Normalized: "${normalizedOrigin}"), Expected FRONTEND_URL: "${process.env.FRONTEND_URL}" (Normalized: "${targetFrontend}")`);
 

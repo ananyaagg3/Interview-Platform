@@ -25,6 +25,7 @@ export const signup = async (req, res) => {
       user: { id: user._id, name: user.name, email: user.email }
     });
   } catch (err) {
+    console.error('Signup error:', err);
     res.status(500).json({ error: 'Server error' });
   }
 };
@@ -49,6 +50,7 @@ export const login = async (req, res) => {
       user: { id: user._id, name: user.name, email: user.email }
     });
   } catch (err) {
+    console.error('Login error:', err);
     res.status(500).json({ error: 'Server error' });
   }
 };
@@ -79,6 +81,7 @@ export const forgotPassword = async (req, res) => {
 
     res.status(200).json({ message: 'Reset code generated successfully.' });
   } catch (err) {
+    console.error('Forgot password error:', err);
     res.status(500).json({ error: 'Server error during forgot password' });
   }
 };
@@ -114,6 +117,7 @@ export const resetPassword = async (req, res) => {
 
     res.status(200).json({ message: 'Password has been reset successfully' });
   } catch (err) {
+    console.error('Reset password error:', err);
     res.status(500).json({ error: 'Server error during password reset' });
   }
 };
@@ -171,6 +175,7 @@ export const updateProfile = async (req, res) => {
       user: { id: user._id, name: user.name, email: user.email }
     });
   } catch (err) {
+    console.error('Update profile error:', err);
     res.status(500).json({ error: 'Server error during profile update' });
   }
 };
