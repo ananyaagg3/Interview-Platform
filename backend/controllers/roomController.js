@@ -4,7 +4,7 @@ import Problem from '../models/Problem.js';
 
 export const createRoom = async (req, res) => {
   try {
-    const { problemSource, problemId, customProblem, duration, defaultLanguage } = req.body;
+    const { problemSource, problemId, customProblem, selectedQuestions, duration, defaultLanguage } = req.body;
     const createdBy = req.user.id;
 
     if (problemSource === 'bank' && !problemId) {
@@ -14,6 +14,12 @@ export const createRoom = async (req, res) => {
       return res.status(400).json({ error: 'Title and description are required for custom problems' });
     }
 
+    const initialSelectedQuestions = selectedQuestions || [{
+      problemSource,
+      problemId: problemSource === 'bank' ? problemId : null,
+      customProblem: problemSource === 'custom' ? customProblem : null
+    }];
+
     const roomId = nanoid(8);
     const room = new Room({
       roomId,
@@ -22,6 +28,7 @@ export const createRoom = async (req, res) => {
       problemSource,
       problemId: problemSource === 'bank' ? problemId : null,
       customProblem: problemSource === 'custom' ? customProblem : null,
+      selectedQuestions: initialSelectedQuestions,
       duration,
       defaultLanguage,
       currentLanguage: defaultLanguage
@@ -40,6 +47,7 @@ export const getRoom = async (req, res) => {
     const { roomId } = req.params;
     const room = await Room.findOne({ roomId })
       .populate('problemId')
+      .populate('selectedQuestions.problemId')
       .populate('interviewerId')
       .populate('candidateId');
     if (!room) {
@@ -59,6 +67,7 @@ export const getPastSessions = async (req, res) => {
       $or: [{ interviewerId: userId }, { candidateId: userId }]
     })
       .populate('problemId')
+      .populate('selectedQuestions.problemId')
       .populate('interviewerId')
       .populate('candidateId')
       .sort({ createdAt: -1 });
@@ -86,6 +95,7 @@ export const getRoomReport = async (req, res) => {
 
     const room = await Room.findOne({ roomId })
       .populate('problemId')
+      .populate('selectedQuestions.problemId')
       .populate('interviewerId')
       .populate('candidateId');
     if (!room) {
@@ -126,7 +136,7 @@ export const getTurnCredentials = async (req, res) => {
 
 export const generateFeedbackReport = async (roomId) => {
   try {
-    const room = await Room.findOne({ roomId }).populate('problemId');
+    const room = await Room.findOne({ roomId }).populate('problemId').populate('selectedQuestions.problemId');
     if (!room) {
       console.error(`generateFeedbackReport: Room ${roomId} not found`);
       return;

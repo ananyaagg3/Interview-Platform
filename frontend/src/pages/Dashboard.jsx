@@ -100,6 +100,7 @@ export default function Dashboard() {
   const [topicFilter, setTopicFilter] = useState('');
   const [difficultyFilter, setDifficultyFilter] = useState('');
   const [selectedProblem, setSelectedProblem] = useState(null);
+  const [selectedQuestions, setSelectedQuestions] = useState([]);
 
   const [customTitle, setCustomTitle] = useState('');
   const [customDesc, setCustomDesc] = useState('');
@@ -148,33 +149,69 @@ export default function Dashboard() {
     }
   };
 
+  const handleAddCustomQuestion = () => {
+    if (!customTitle.trim() || !customDesc.trim()) {
+      setAlertModal({
+        title: 'Incomplete Problem Details',
+        message: 'Please specify both a title and a description for your custom problem.'
+      });
+      return;
+    }
+    setSelectedQuestions(prev => [...prev, {
+      problemSource: 'custom',
+      customProblem: { title: customTitle, description: customDesc },
+      title: customTitle,
+      topic: 'Custom',
+      difficulty: 'Medium'
+    }]);
+    setCustomTitle('');
+    setCustomDesc('');
+  };
+
   const handleCreateRoom = async () => {
     try {
+      const finalQuestions = [...selectedQuestions];
+      
+      // Fallback: If they haven't explicitly clicked "+ Add", add their currently active input/selection
+      if (finalQuestions.length === 0) {
+        if (activeTab === 'bank' && selectedProblem) {
+          finalQuestions.push({
+            problemSource: 'bank',
+            problemId: selectedProblem._id,
+            title: selectedProblem.title,
+            topic: selectedProblem.topic,
+            difficulty: selectedProblem.difficulty
+          });
+        } else if (activeTab === 'custom' && customTitle && customDesc) {
+          finalQuestions.push({
+            problemSource: 'custom',
+            customProblem: { title: customTitle, description: customDesc },
+            title: customTitle,
+            topic: 'Custom',
+            difficulty: 'Medium'
+          });
+        } else {
+          setAlertModal({
+            title: 'No Questions Selected',
+            message: 'Please add at least one question to the session.'
+          });
+          return;
+        }
+      }
+
+      const activeQ = finalQuestions[0];
       const payload = {
-        problemSource: activeTab,
+        problemSource: activeQ.problemSource,
+        problemId: activeQ.problemSource === 'bank' ? activeQ.problemId : null,
+        customProblem: activeQ.problemSource === 'custom' ? activeQ.customProblem : null,
+        selectedQuestions: finalQuestions.map(q => ({
+          problemSource: q.problemSource,
+          problemId: q.problemId,
+          customProblem: q.customProblem
+        })),
         duration: Number(duration),
         defaultLanguage: language
       };
-
-      if (activeTab === 'bank') {
-        if (!selectedProblem) {
-          setAlertModal({
-            title: 'Select a Problem',
-            message: 'Please choose a problem from the question bank to start this session.'
-          });
-          return;
-        }
-        payload.problemId = selectedProblem._id;
-      } else {
-        if (!customTitle || !customDesc) {
-          setAlertModal({
-            title: 'Incomplete Problem Details',
-            message: 'Please specify both a title and a description for your custom problem.'
-          });
-          return;
-        }
-        payload.customProblem = { title: customTitle, description: customDesc };
-      }
 
       const data = await apiFetch('/rooms/create', {
         method: 'POST',
@@ -367,7 +404,13 @@ export default function Dashboard() {
               
               <div className="relative z-10 mt-6">
                 <button
-                  onClick={() => setShowCreateModal(true)}
+                  onClick={() => {
+                    setSelectedQuestions([]);
+                    setSelectedProblem(null);
+                    setCustomTitle('');
+                    setCustomDesc('');
+                    setShowCreateModal(true);
+                  }}
                   className="bg-orange-500 hover:bg-orange-600 active:bg-orange-700 text-white font-bold px-6 py-3.5 rounded-xl shadow-md transition-all hover:shadow-lg active:scale-[0.98] cursor-pointer flex items-center justify-center gap-2 w-full md:w-auto"
                 >
                   <Plus size={18} />
@@ -546,6 +589,7 @@ export default function Dashboard() {
                 onClick={() => {
                   setShowCreateModal(false);
                   setCreatedRoomId(null);
+                  setSelectedQuestions([]);
                 }}
                 className="text-gray-400 hover:text-gray-700 hover:bg-gray-100 p-1.5 rounded-lg transition cursor-pointer"
                 title="Close"
@@ -573,6 +617,28 @@ export default function Dashboard() {
                     </button>
                   </div>
 
+                  {/* Selected Questions Banner */}
+                  {selectedQuestions.length > 0 && (
+                    <div className="mb-4 bg-orange-50/50 border border-orange-200 rounded-xl p-3 shrink-0 animate-in fade-in slide-in-from-top-1 duration-150">
+                      <label className="block text-[10px] font-bold text-orange-700 uppercase tracking-wider mb-2">Selected Questions ({selectedQuestions.length})</label>
+                      <div className="flex flex-wrap gap-1.5 max-h-[85px] overflow-y-auto pr-1">
+                        {selectedQuestions.map((q, idx) => (
+                          <div key={idx} className="flex items-center gap-1.5 bg-white border border-orange-200 text-orange-850 px-2.5 py-1 rounded-lg text-xs font-semibold shadow-xs">
+                            <span>Q{idx + 1}: {q.title}</span>
+                            <button
+                              type="button"
+                              onClick={() => setSelectedQuestions(prev => prev.filter((_, i) => i !== idx))}
+                              className="text-orange-400 hover:text-orange-600 transition ml-1 cursor-pointer flex items-center justify-center"
+                              title="Remove"
+                            >
+                              <X size={12} />
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
                   {activeTab === 'bank' ? (
                     <div className="flex-1 flex flex-col min-h-[250px] mb-4">
                       <div className="flex flex-wrap gap-2 mb-3 shrink-0">
@@ -593,19 +659,48 @@ export default function Dashboard() {
                         </select>
                       </div>
                       <div className="border border-gray-200 rounded-xl flex-1 overflow-y-auto max-h-[200px] shadow-inner bg-gray-50">
-                        {filteredProblems.map(p => (
-                          <div 
-                            key={p._id} 
-                            onClick={() => setSelectedProblem(p)}
-                            className={`p-3 border-b border-gray-100 cursor-pointer hover:bg-orange-50/50 transition-colors ${selectedProblem?._id === p._id ? 'bg-orange-50 border-l-4 border-l-orange-500 font-semibold' : ''}`}
-                          >
-                            <div className="font-semibold text-sm text-gray-800">{p.title}</div>
-                            <div className="flex gap-2 mt-1.5">
-                              <span className="text-[10px] bg-gray-200 text-gray-700 px-2 py-0.5 rounded font-bold uppercase tracking-wider">{p.topic}</span>
-                              <span className={`text-[10px] px-2 py-0.5 rounded font-bold uppercase tracking-wider ${p.difficulty==='Easy'?'bg-green-100 text-green-700':p.difficulty==='Medium'?'bg-yellow-100 text-yellow-700':'bg-red-100 text-red-700'}`}>{p.difficulty}</span>
+                        {filteredProblems.map(p => {
+                          const isAdded = selectedQuestions.some(q => q.problemSource === 'bank' && q.problemId === p._id);
+                          return (
+                            <div 
+                              key={p._id} 
+                              onClick={() => setSelectedProblem(p)}
+                              className={`p-3 border-b border-gray-100 cursor-pointer hover:bg-orange-50/50 transition-colors flex justify-between items-center ${selectedProblem?._id === p._id ? 'bg-orange-50 border-l-4 border-l-orange-500 font-semibold' : ''}`}
+                            >
+                              <div className="flex-1">
+                                <div className="font-semibold text-sm text-gray-800">{p.title}</div>
+                                <div className="flex gap-2 mt-1.5">
+                                  <span className="text-[10px] bg-gray-200 text-gray-700 px-2 py-0.5 rounded font-bold uppercase tracking-wider">{p.topic}</span>
+                                  <span className={`text-[10px] px-2 py-0.5 rounded font-bold uppercase tracking-wider ${p.difficulty==='Easy'?'bg-green-100 text-green-700':p.difficulty==='Medium'?'bg-yellow-100 text-yellow-700':'bg-red-100 text-red-700'}`}>{p.difficulty}</span>
+                                </div>
+                              </div>
+                              <button
+                                type="button"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  if (isAdded) {
+                                    setSelectedQuestions(prev => prev.filter(q => !(q.problemSource === 'bank' && q.problemId === p._id)));
+                                  } else {
+                                    setSelectedQuestions(prev => [...prev, {
+                                      problemSource: 'bank',
+                                      problemId: p._id,
+                                      title: p.title,
+                                      topic: p.topic,
+                                      difficulty: p.difficulty
+                                    }]);
+                                  }
+                                }}
+                                className={`ml-4 px-2.5 py-1 text-xs font-semibold rounded-lg border transition-all cursor-pointer ${
+                                  isAdded 
+                                    ? 'bg-green-50 border-green-200 text-green-600 hover:bg-green-100 hover:text-green-700 font-bold' 
+                                    : 'bg-orange-500 border-transparent text-white hover:bg-orange-600'
+                                }`}
+                              >
+                                {isAdded ? 'Added' : '+ Add'}
+                              </button>
                             </div>
-                          </div>
-                        ))}
+                          );
+                        })}
                         {filteredProblems.length === 0 && <div className="p-4 text-center text-sm text-gray-500">No problems found.</div>}
                       </div>
                     </div>
@@ -618,11 +713,20 @@ export default function Dashboard() {
                       />
                       <textarea 
                         placeholder="Problem Description" 
-                        className="flex-1 border border-gray-300 p-2.5 rounded-xl text-sm outline-none focus:border-orange-500 resize-none shadow-sm min-h-[140px]"
+                        className="flex-1 border border-gray-300 p-2.5 rounded-xl text-sm outline-none focus:border-orange-500 resize-none shadow-sm min-h-[120px]"
                         value={customDesc} onChange={e => setCustomDesc(e.target.value)}
                         maxLength={2000}
                       ></textarea>
-                      <div className="text-xs text-right text-gray-400 -mt-2">{customDesc.length}/2000</div>
+                      <div className="flex justify-between items-center -mt-2">
+                        <span className="text-xs text-gray-400">{customDesc.length}/2000</span>
+                        <button
+                          type="button"
+                          onClick={handleAddCustomQuestion}
+                          className="px-4 py-1.5 bg-orange-100 hover:bg-orange-200 text-orange-700 text-xs font-semibold rounded-xl transition cursor-pointer border border-orange-200 shadow-xs"
+                        >
+                          + Add Custom Question
+                        </button>
+                      </div>
                     </div>
                   )}
 

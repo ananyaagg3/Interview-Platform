@@ -3,42 +3,1169 @@
     "title": "Two Sum",
     "topic": "Arrays",
     "difficulty": "Easy",
-    "description": "Given an array of integers nums and an integer target, return indices of the two numbers such that they add up to target. You may assume that each input would have exactly one solution, and you may not use the same element twice."
+    "description": "Given an array of integers nums and an integer target, return indices of the two numbers such that they add up to target. You may assume that each input would have exactly one solution, and you may not use the same element twice.",
+    "source": "bank"
   },
   {
     "title": "Merge Intervals",
     "topic": "Arrays",
     "difficulty": "Medium",
-    "description": "Given an array of intervals where intervals[i] = [starti, endi], merge all overlapping intervals, and return an array of the non-overlapping intervals that cover all the intervals in the input."
+    "description": "Given an array of intervals where intervals[i] = [starti, endi], merge all overlapping intervals, and return an array of the non-overlapping intervals that cover all the intervals in the input.",
+    "source": "bank"
   },
   {
     "title": "Reverse Linked List",
     "topic": "Linked List",
     "difficulty": "Easy",
-    "description": "Given the head of a singly linked list, reverse the list, and return the reversed list."
+    "description": "Given the head of a singly linked list, reverse the list, and return the reversed list.",
+    "source": "bank"
   },
   {
     "title": "LRU Cache",
     "topic": "Linked List",
     "difficulty": "Medium",
-    "description": "Design a data structure that follows the constraints of a Least Recently Used (LRU) cache. Implement the LRUCache class."
+    "description": "Design a data structure that follows the constraints of a Least Recently Used (LRU) cache. Implement the LRUCache class.",
+    "source": "bank"
   },
   {
     "title": "Binary Search",
     "topic": "Binary Search",
     "difficulty": "Easy",
-    "description": "Given an array of integers nums which is sorted in ascending order, and an integer target, write a function to search target in nums. If target exists, then return its index. Otherwise, return -1."
+    "description": "Given an array of integers nums which is sorted in ascending order, and an integer target, write a function to search target in nums. If target exists, then return its index. Otherwise, return -1.",
+    "source": "bank"
   },
   {
     "title": "Number of Islands",
     "topic": "Graphs",
     "difficulty": "Medium",
-    "description": "Given an m x n 2D binary grid grid which represents a map of '1's (land) and '0's (water), return the number of islands. An island is surrounded by water and is formed by connecting adjacent lands horizontally or vertically."
+    "description": "Given an m x n 2D binary grid grid which represents a map of '1's (land) and '0's (water), return the number of islands. An island is surrounded by water and is formed by connecting adjacent lands horizontally or vertically.",
+    "source": "bank"
   },
   {
     "title": "Climbing Stairs",
     "topic": "Dynamic Programming",
     "difficulty": "Easy",
-    "description": "You are climbing a staircase. It takes n steps to reach the top. Each time you can either climb 1 or 2 steps. In how many distinct ways can you climb to the top?"
+    "description": "You are climbing a staircase. It takes n steps to reach the top. Each time you can either climb 1 or 2 steps. In how many distinct ways can you climb to the top?",
+    "source": "bank"
+  },
+  {
+    "title": "Kadane's Algorithm",
+    "topic": "Dynamic Programming",
+    "difficulty": "Medium",
+    "description": "### GeeksforGeeks Problem\n\nThis question is imported from GeeksforGeeks. You can read the full problem statement and submit your solution directly on GFG:\n\n👉 [Solve \"Kadane's Algorithm\" on GeeksforGeeks](https://www.geeksforgeeks.org/problems/kadanes-algorithm-1587115620/1)\n\n**Statistics:**\n- **Difficulty:** Medium\n- **Accuracy:** 36.28%\n- **Total Submissions:** 12,55,997",
+    "source": "gfg"
+  },
+  {
+    "title": "Perfect Sum Problem",
+    "topic": "Dynamic Programming",
+    "difficulty": "Medium",
+    "description": "### GeeksforGeeks Problem\n\nThis question is imported from GeeksforGeeks. You can read the full problem statement and submit your solution directly on GFG:\n\n👉 [Solve \"Perfect Sum Problem\" on GeeksforGeeks](https://www.geeksforgeeks.org/problems/perfect-sum-problem5633/1)\n\n**Statistics:**\n- **Difficulty:** Medium\n- **Accuracy:** 20.58%\n- **Total Submissions:** 6,36,395",
+    "source": "gfg"
+  },
+  {
+    "title": "0 - 1 Knapsack Problem",
+    "topic": "Dynamic Programming",
+    "difficulty": "Medium",
+    "description": "### GeeksforGeeks Problem\n\nThis question is imported from GeeksforGeeks. You can read the full problem statement and submit your solution directly on GFG:\n\n👉 [Solve \"0 - 1 Knapsack Problem\" on GeeksforGeeks](https://www.geeksforgeeks.org/problems/0-1-knapsack-problem0945/1)\n\n**Statistics:**\n- **Difficulty:** Medium\n- **Accuracy:** 31.76%\n- **Total Submissions:** 5,81,592",
+    "source": "gfg"
+  },
+  {
+    "title": "Maximum Product Subarray",
+    "topic": "Dynamic Programming",
+    "difficulty": "Medium",
+    "description": "### GeeksforGeeks Problem\n\nThis question is imported from GeeksforGeeks. You can read the full problem statement and submit your solution directly on GFG:\n\n👉 [Solve \"Maximum Product Subarray\" on GeeksforGeeks](https://www.geeksforgeeks.org/problems/maximum-product-subarray3604/1)\n\n**Statistics:**\n- **Difficulty:** Medium\n- **Accuracy:** 18.09%\n- **Total Submissions:** 5,12,516",
+    "source": "gfg"
+  },
+  {
+    "title": "Subset Sum Problem",
+    "topic": "Dynamic Programming",
+    "difficulty": "Medium",
+    "description": "### GeeksforGeeks Problem\n\nThis question is imported from GeeksforGeeks. You can read the full problem statement and submit your solution directly on GFG:\n\n👉 [Solve \"Subset Sum Problem\" on GeeksforGeeks](https://www.geeksforgeeks.org/problems/subset-sum-problem-1611555638/1)\n\n**Statistics:**\n- **Difficulty:** Medium\n- **Accuracy:** 32.0%\n- **Total Submissions:** 4,60,216",
+    "source": "gfg"
+  },
+  {
+    "title": "Nth Fibonacci Number",
+    "topic": "Dynamic Programming",
+    "difficulty": "Easy",
+    "description": "### GeeksforGeeks Problem\n\nThis question is imported from GeeksforGeeks. You can read the full problem statement and submit your solution directly on GFG:\n\n👉 [Solve \"Nth Fibonacci Number\" on GeeksforGeeks](https://www.geeksforgeeks.org/problems/nth-fibonacci-number1335/1)\n\n**Statistics:**\n- **Difficulty:** Easy\n- **Accuracy:** 22.3%\n- **Total Submissions:** 4,08,315",
+    "source": "gfg"
+  },
+  {
+    "title": "Stickler Thief",
+    "topic": "Dynamic Programming",
+    "difficulty": "Medium",
+    "description": "### GeeksforGeeks Problem\n\nThis question is imported from GeeksforGeeks. You can read the full problem statement and submit your solution directly on GFG:\n\n👉 [Solve \"Stickler Thief\" on GeeksforGeeks](https://www.geeksforgeeks.org/problems/stickler-theif-1587115621/1)\n\n**Statistics:**\n- **Difficulty:** Medium\n- **Accuracy:** 37.98%\n- **Total Submissions:** 4,03,956",
+    "source": "gfg"
+  },
+  {
+    "title": "Ways to Reach the n'th Stair",
+    "topic": "Dynamic Programming",
+    "difficulty": "Medium",
+    "description": "### GeeksforGeeks Problem\n\nThis question is imported from GeeksforGeeks. You can read the full problem statement and submit your solution directly on GFG:\n\n👉 [Solve \"Ways to Reach the n'th Stair\" on GeeksforGeeks](https://www.geeksforgeeks.org/problems/count-ways-to-reach-the-nth-stair-1587115620/1)\n\n**Statistics:**\n- **Difficulty:** Medium\n- **Accuracy:** 21.9%\n- **Total Submissions:** 3,92,474",
+    "source": "gfg"
+  },
+  {
+    "title": "Longest Increasing Subsequence",
+    "topic": "Dynamic Programming",
+    "difficulty": "Medium",
+    "description": "### GeeksforGeeks Problem\n\nThis question is imported from GeeksforGeeks. You can read the full problem statement and submit your solution directly on GFG:\n\n👉 [Solve \"Longest Increasing Subsequence\" on GeeksforGeeks](https://www.geeksforgeeks.org/problems/longest-increasing-subsequence-1587115620/1)\n\n**Statistics:**\n- **Difficulty:** Medium\n- **Accuracy:** 32.8%\n- **Total Submissions:** 3,79,980",
+    "source": "gfg"
+  },
+  {
+    "title": "nCr",
+    "topic": "Dynamic Programming",
+    "difficulty": "Medium",
+    "description": "### GeeksforGeeks Problem\n\nThis question is imported from GeeksforGeeks. You can read the full problem statement and submit your solution directly on GFG:\n\n👉 [Solve \"nCr\" on GeeksforGeeks](https://www.geeksforgeeks.org/problems/ncr1019/1)\n\n**Statistics:**\n- **Difficulty:** Medium\n- **Accuracy:** 14.82%\n- **Total Submissions:** 3,65,665",
+    "source": "gfg"
+  },
+  {
+    "title": "Undirected Graph Cycle",
+    "topic": "Graphs",
+    "difficulty": "Medium",
+    "description": "### GeeksforGeeks Problem\n\nThis question is imported from GeeksforGeeks. You can read the full problem statement and submit your solution directly on GFG:\n\n👉 [Solve \"Undirected Graph Cycle\" on GeeksforGeeks](https://www.geeksforgeeks.org/problems/detect-cycle-in-an-undirected-graph/1)\n\n**Statistics:**\n- **Difficulty:** Medium\n- **Accuracy:** 30.13%\n- **Total Submissions:** 7,26,445",
+    "source": "gfg"
+  },
+  {
+    "title": "Directed Graph Cycle",
+    "topic": "Graphs",
+    "difficulty": "Medium",
+    "description": "### GeeksforGeeks Problem\n\nThis question is imported from GeeksforGeeks. You can read the full problem statement and submit your solution directly on GFG:\n\n👉 [Solve \"Directed Graph Cycle\" on GeeksforGeeks](https://www.geeksforgeeks.org/problems/detect-cycle-in-a-directed-graph/1)\n\n**Statistics:**\n- **Difficulty:** Medium\n- **Accuracy:** 27.88%\n- **Total Submissions:** 5,83,874",
+    "source": "gfg"
+  },
+  {
+    "title": "BFS of graph",
+    "topic": "Graphs",
+    "difficulty": "Easy",
+    "description": "### GeeksforGeeks Problem\n\nThis question is imported from GeeksforGeeks. You can read the full problem statement and submit your solution directly on GFG:\n\n👉 [Solve \"BFS of graph\" on GeeksforGeeks](https://www.geeksforgeeks.org/problems/bfs-traversal-of-graph/1)\n\n**Statistics:**\n- **Difficulty:** Easy\n- **Accuracy:** 44.09%\n- **Total Submissions:** 5,60,625",
+    "source": "gfg"
+  },
+  {
+    "title": "DFS of Graph",
+    "topic": "Graphs",
+    "difficulty": "Easy",
+    "description": "### GeeksforGeeks Problem\n\nThis question is imported from GeeksforGeeks. You can read the full problem statement and submit your solution directly on GFG:\n\n👉 [Solve \"DFS of Graph\" on GeeksforGeeks](https://www.geeksforgeeks.org/problems/depth-first-traversal-for-a-graph/1)\n\n**Statistics:**\n- **Difficulty:** Easy\n- **Accuracy:** 63.07%\n- **Total Submissions:** 4,08,424",
+    "source": "gfg"
+  },
+  {
+    "title": "Topological Sort",
+    "topic": "Graphs",
+    "difficulty": "Medium",
+    "description": "### GeeksforGeeks Problem\n\nThis question is imported from GeeksforGeeks. You can read the full problem statement and submit your solution directly on GFG:\n\n👉 [Solve \"Topological Sort\" on GeeksforGeeks](https://www.geeksforgeeks.org/problems/topological-sort/1)\n\n**Statistics:**\n- **Difficulty:** Medium\n- **Accuracy:** 56.52%\n- **Total Submissions:** 3,52,215",
+    "source": "gfg"
+  },
+  {
+    "title": "Dijkstra Algorithm",
+    "topic": "Graphs",
+    "difficulty": "Medium",
+    "description": "### GeeksforGeeks Problem\n\nThis question is imported from GeeksforGeeks. You can read the full problem statement and submit your solution directly on GFG:\n\n👉 [Solve \"Dijkstra Algorithm\" on GeeksforGeeks](https://www.geeksforgeeks.org/problems/implementing-dijkstra-set-1-adjacency-matrix/1)\n\n**Statistics:**\n- **Difficulty:** Medium\n- **Accuracy:** 50.83%\n- **Total Submissions:** 2,92,900",
+    "source": "gfg"
+  },
+  {
+    "title": "Bellman-Ford",
+    "topic": "Graphs",
+    "difficulty": "Medium",
+    "description": "### GeeksforGeeks Problem\n\nThis question is imported from GeeksforGeeks. You can read the full problem statement and submit your solution directly on GFG:\n\n👉 [Solve \"Bellman-Ford\" on GeeksforGeeks](https://www.geeksforgeeks.org/problems/distance-from-the-source-bellman-ford-algorithm/1)\n\n**Statistics:**\n- **Difficulty:** Medium\n- **Accuracy:** 48.11%\n- **Total Submissions:** 2,72,312",
+    "source": "gfg"
+  },
+  {
+    "title": "Find the number of islands",
+    "topic": "Graphs",
+    "difficulty": "Medium",
+    "description": "### GeeksforGeeks Problem\n\nThis question is imported from GeeksforGeeks. You can read the full problem statement and submit your solution directly on GFG:\n\n👉 [Solve \"Find the number of islands\" on GeeksforGeeks](https://www.geeksforgeeks.org/problems/find-the-number-of-islands/1)\n\n**Statistics:**\n- **Difficulty:** Medium\n- **Accuracy:** 42.12%\n- **Total Submissions:** 2,65,990",
+    "source": "gfg"
+  },
+  {
+    "title": "Floyd Warshall",
+    "topic": "Graphs",
+    "difficulty": "Medium",
+    "description": "### GeeksforGeeks Problem\n\nThis question is imported from GeeksforGeeks. You can read the full problem statement and submit your solution directly on GFG:\n\n👉 [Solve \"Floyd Warshall\" on GeeksforGeeks](https://www.geeksforgeeks.org/problems/implementing-floyd-warshall2042/1)\n\n**Statistics:**\n- **Difficulty:** Medium\n- **Accuracy:** 32.89%\n- **Total Submissions:** 2,61,348",
+    "source": "gfg"
+  },
+  {
+    "title": "Alien Dictionary",
+    "topic": "Graphs",
+    "difficulty": "Hard",
+    "description": "### GeeksforGeeks Problem\n\nThis question is imported from GeeksforGeeks. You can read the full problem statement and submit your solution directly on GFG:\n\n👉 [Solve \"Alien Dictionary\" on GeeksforGeeks](https://www.geeksforgeeks.org/problems/alien-dictionary/1)\n\n**Statistics:**\n- **Difficulty:** Hard\n- **Accuracy:** 47.81%\n- **Total Submissions:** 2,44,649",
+    "source": "gfg"
+  },
+  {
+    "title": "Check for BST",
+    "topic": "Tree",
+    "difficulty": "Medium",
+    "description": "### GeeksforGeeks Problem\n\nThis question is imported from GeeksforGeeks. You can read the full problem statement and submit your solution directly on GFG:\n\n👉 [Solve \"Check for BST\" on GeeksforGeeks](https://www.geeksforgeeks.org/problems/check-for-bst/1)\n\n**Statistics:**\n- **Difficulty:** Medium\n- **Accuracy:** 25.37%\n- **Total Submissions:** 6,06,969",
+    "source": "gfg"
+  },
+  {
+    "title": "Left View of Binary Tree",
+    "topic": "Tree",
+    "difficulty": "Easy",
+    "description": "### GeeksforGeeks Problem\n\nThis question is imported from GeeksforGeeks. You can read the full problem statement and submit your solution directly on GFG:\n\n👉 [Solve \"Left View of Binary Tree\" on GeeksforGeeks](https://www.geeksforgeeks.org/problems/left-view-of-binary-tree/1)\n\n**Statistics:**\n- **Difficulty:** Easy\n- **Accuracy:** 33.74%\n- **Total Submissions:** 6,03,415",
+    "source": "gfg"
+  },
+  {
+    "title": "Tree Boundary Traversal",
+    "topic": "Tree",
+    "difficulty": "Medium",
+    "description": "### GeeksforGeeks Problem\n\nThis question is imported from GeeksforGeeks. You can read the full problem statement and submit your solution directly on GFG:\n\n👉 [Solve \"Tree Boundary Traversal\" on GeeksforGeeks](https://www.geeksforgeeks.org/problems/boundary-traversal-of-binary-tree/1)\n\n**Statistics:**\n- **Difficulty:** Medium\n- **Accuracy:** 23.33%\n- **Total Submissions:** 5,53,871",
+    "source": "gfg"
+  },
+  {
+    "title": "Top View of Binary Tree",
+    "topic": "Tree",
+    "difficulty": "Medium",
+    "description": "### GeeksforGeeks Problem\n\nThis question is imported from GeeksforGeeks. You can read the full problem statement and submit your solution directly on GFG:\n\n👉 [Solve \"Top View of Binary Tree\" on GeeksforGeeks](https://www.geeksforgeeks.org/problems/top-view-of-binary-tree/1)\n\n**Statistics:**\n- **Difficulty:** Medium\n- **Accuracy:** 38.43%\n- **Total Submissions:** 4,60,320",
+    "source": "gfg"
+  },
+  {
+    "title": "ZigZag Tree Traversal",
+    "topic": "Tree",
+    "difficulty": "Medium",
+    "description": "### GeeksforGeeks Problem\n\nThis question is imported from GeeksforGeeks. You can read the full problem statement and submit your solution directly on GFG:\n\n👉 [Solve \"ZigZag Tree Traversal\" on GeeksforGeeks](https://www.geeksforgeeks.org/problems/zigzag-tree-traversal/1)\n\n**Statistics:**\n- **Difficulty:** Medium\n- **Accuracy:** 54.05%\n- **Total Submissions:** 4,35,934",
+    "source": "gfg"
+  },
+  {
+    "title": "Diameter of a Binary Tree",
+    "topic": "Tree",
+    "difficulty": "Medium",
+    "description": "### GeeksforGeeks Problem\n\nThis question is imported from GeeksforGeeks. You can read the full problem statement and submit your solution directly on GFG:\n\n👉 [Solve \"Diameter of a Binary Tree\" on GeeksforGeeks](https://www.geeksforgeeks.org/problems/diameter-of-binary-tree/1)\n\n**Statistics:**\n- **Difficulty:** Medium\n- **Accuracy:** 47.37%\n- **Total Submissions:** 3,71,656",
+    "source": "gfg"
+  },
+  {
+    "title": "Balanced Tree Check",
+    "topic": "Tree",
+    "difficulty": "Easy",
+    "description": "### GeeksforGeeks Problem\n\nThis question is imported from GeeksforGeeks. You can read the full problem statement and submit your solution directly on GFG:\n\n👉 [Solve \"Balanced Tree Check\" on GeeksforGeeks](https://www.geeksforgeeks.org/problems/check-for-balanced-tree/1)\n\n**Statistics:**\n- **Difficulty:** Easy\n- **Accuracy:** 43.15%\n- **Total Submissions:** 3,64,118",
+    "source": "gfg"
+  },
+  {
+    "title": "Height of Binary Tree",
+    "topic": "Tree",
+    "difficulty": "Easy",
+    "description": "### GeeksforGeeks Problem\n\nThis question is imported from GeeksforGeeks. You can read the full problem statement and submit your solution directly on GFG:\n\n👉 [Solve \"Height of Binary Tree\" on GeeksforGeeks](https://www.geeksforgeeks.org/problems/height-of-binary-tree/1)\n\n**Statistics:**\n- **Difficulty:** Easy\n- **Accuracy:** 78.58%\n- **Total Submissions:** 3,62,415",
+    "source": "gfg"
+  },
+  {
+    "title": "Bottom View of Binary Tree",
+    "topic": "Tree",
+    "difficulty": "Medium",
+    "description": "### GeeksforGeeks Problem\n\nThis question is imported from GeeksforGeeks. You can read the full problem statement and submit your solution directly on GFG:\n\n👉 [Solve \"Bottom View of Binary Tree\" on GeeksforGeeks](https://www.geeksforgeeks.org/problems/bottom-view-of-binary-tree/1)\n\n**Statistics:**\n- **Difficulty:** Medium\n- **Accuracy:** 54.18%\n- **Total Submissions:** 3,53,425",
+    "source": "gfg"
+  },
+  {
+    "title": "Identical Trees",
+    "topic": "Tree",
+    "difficulty": "Easy",
+    "description": "### GeeksforGeeks Problem\n\nThis question is imported from GeeksforGeeks. You can read the full problem statement and submit your solution directly on GFG:\n\n👉 [Solve \"Identical Trees\" on GeeksforGeeks](https://www.geeksforgeeks.org/problems/determine-if-two-trees-are-identical/1)\n\n**Statistics:**\n- **Difficulty:** Easy\n- **Accuracy:** 50.01%\n- **Total Submissions:** 3,09,882",
+    "source": "gfg"
+  },
+  {
+    "title": "Remove loop in Linked List",
+    "topic": "Linked List",
+    "difficulty": "Medium",
+    "description": "### GeeksforGeeks Problem\n\nThis question is imported from GeeksforGeeks. You can read the full problem statement and submit your solution directly on GFG:\n\n👉 [Solve \"Remove loop in Linked List\" on GeeksforGeeks](https://www.geeksforgeeks.org/problems/remove-loop-in-linked-list/1)\n\n**Statistics:**\n- **Difficulty:** Medium\n- **Accuracy:** 27.66%\n- **Total Submissions:** 5,57,425",
+    "source": "gfg"
+  },
+  {
+    "title": "Detect Loop in linked list",
+    "topic": "Linked List",
+    "difficulty": "Medium",
+    "description": "### GeeksforGeeks Problem\n\nThis question is imported from GeeksforGeeks. You can read the full problem statement and submit your solution directly on GFG:\n\n👉 [Solve \"Detect Loop in linked list\" on GeeksforGeeks](https://www.geeksforgeeks.org/problems/detect-loop-in-linked-list/1)\n\n**Statistics:**\n- **Difficulty:** Medium\n- **Accuracy:** 43.49%\n- **Total Submissions:** 5,26,993",
+    "source": "gfg"
+  },
+  {
+    "title": "Kth from End of Linked List",
+    "topic": "Linked List",
+    "difficulty": "Easy",
+    "description": "### GeeksforGeeks Problem\n\nThis question is imported from GeeksforGeeks. You can read the full problem statement and submit your solution directly on GFG:\n\n👉 [Solve \"Kth from End of Linked List\" on GeeksforGeeks](https://www.geeksforgeeks.org/problems/nth-node-from-end-of-linked-list/1)\n\n**Statistics:**\n- **Difficulty:** Easy\n- **Accuracy:** 41.18%\n- **Total Submissions:** 4,58,924",
+    "source": "gfg"
+  },
+  {
+    "title": "Middle of a Linked List",
+    "topic": "Linked List",
+    "difficulty": "Easy",
+    "description": "### GeeksforGeeks Problem\n\nThis question is imported from GeeksforGeeks. You can read the full problem statement and submit your solution directly on GFG:\n\n👉 [Solve \"Middle of a Linked List\" on GeeksforGeeks](https://www.geeksforgeeks.org/problems/finding-middle-element-in-a-linked-list/1)\n\n**Statistics:**\n- **Difficulty:** Easy\n- **Accuracy:** 57.93%\n- **Total Submissions:** 4,10,709",
+    "source": "gfg"
+  },
+  {
+    "title": "Linked List End Insertion",
+    "topic": "Linked List",
+    "difficulty": "Easy",
+    "description": "### GeeksforGeeks Problem\n\nThis question is imported from GeeksforGeeks. You can read the full problem statement and submit your solution directly on GFG:\n\n👉 [Solve \"Linked List End Insertion\" on GeeksforGeeks](https://www.geeksforgeeks.org/problems/linked-list-insertion-1587115620/1)\n\n**Statistics:**\n- **Difficulty:** Basic\n- **Accuracy:** 43.96%\n- **Total Submissions:** 4,03,174",
+    "source": "gfg"
+  },
+  {
+    "title": "Palindrome Linked List",
+    "topic": "Linked List",
+    "difficulty": "Medium",
+    "description": "### GeeksforGeeks Problem\n\nThis question is imported from GeeksforGeeks. You can read the full problem statement and submit your solution directly on GFG:\n\n👉 [Solve \"Palindrome Linked List\" on GeeksforGeeks](https://www.geeksforgeeks.org/problems/check-if-linked-list-is-pallindrome/1)\n\n**Statistics:**\n- **Difficulty:** Medium\n- **Accuracy:** 41.48%\n- **Total Submissions:** 3,95,353",
+    "source": "gfg"
+  },
+  {
+    "title": "Reverse a linked list",
+    "topic": "Linked List",
+    "difficulty": "Easy",
+    "description": "### GeeksforGeeks Problem\n\nThis question is imported from GeeksforGeeks. You can read the full problem statement and submit your solution directly on GFG:\n\n👉 [Solve \"Reverse a linked list\" on GeeksforGeeks](https://www.geeksforgeeks.org/problems/reverse-a-linked-list/1)\n\n**Statistics:**\n- **Difficulty:** Easy\n- **Accuracy:** 73.11%\n- **Total Submissions:** 3,90,250",
+    "source": "gfg"
+  },
+  {
+    "title": "Add Number Linked Lists",
+    "topic": "Linked List",
+    "difficulty": "Medium",
+    "description": "### GeeksforGeeks Problem\n\nThis question is imported from GeeksforGeeks. You can read the full problem statement and submit your solution directly on GFG:\n\n👉 [Solve \"Add Number Linked Lists\" on GeeksforGeeks](https://www.geeksforgeeks.org/problems/add-two-numbers-represented-by-linked-lists/1)\n\n**Statistics:**\n- **Difficulty:** Medium\n- **Accuracy:** 34.52%\n- **Total Submissions:** 3,87,261",
+    "source": "gfg"
+  },
+  {
+    "title": "Add 1 to a Linked List Number",
+    "topic": "Linked List",
+    "difficulty": "Medium",
+    "description": "### GeeksforGeeks Problem\n\nThis question is imported from GeeksforGeeks. You can read the full problem statement and submit your solution directly on GFG:\n\n👉 [Solve \"Add 1 to a Linked List Number\" on GeeksforGeeks](https://www.geeksforgeeks.org/problems/add-1-to-a-number-represented-as-linked-list/1)\n\n**Statistics:**\n- **Difficulty:** Medium\n- **Accuracy:** 31.91%\n- **Total Submissions:** 3,64,145",
+    "source": "gfg"
+  },
+  {
+    "title": "Remove Duplicates from a Sorted Linked List",
+    "topic": "Linked List",
+    "difficulty": "Easy",
+    "description": "### GeeksforGeeks Problem\n\nThis question is imported from GeeksforGeeks. You can read the full problem statement and submit your solution directly on GFG:\n\n👉 [Solve \"Remove Duplicates from a Sorted Linked List\" on GeeksforGeeks](https://www.geeksforgeeks.org/problems/remove-duplicate-element-from-sorted-linked-list/1)\n\n**Statistics:**\n- **Difficulty:** Easy\n- **Accuracy:** 49.37%\n- **Total Submissions:** 3,39,023",
+    "source": "gfg"
+  },
+  {
+    "title": "Rat in a Maze",
+    "topic": "Backtracking",
+    "difficulty": "Medium",
+    "description": "### GeeksforGeeks Problem\n\nThis question is imported from GeeksforGeeks. You can read the full problem statement and submit your solution directly on GFG:\n\n👉 [Solve \"Rat in a Maze\" on GeeksforGeeks](https://www.geeksforgeeks.org/problems/rat-in-a-maze-problem/1)\n\n**Statistics:**\n- **Difficulty:** Medium\n- **Accuracy:** 35.75%\n- **Total Submissions:** 4,18,085",
+    "source": "gfg"
+  },
+  {
+    "title": "Distinct Permutations of a String",
+    "topic": "Backtracking",
+    "difficulty": "Medium",
+    "description": "### GeeksforGeeks Problem\n\nThis question is imported from GeeksforGeeks. You can read the full problem statement and submit your solution directly on GFG:\n\n👉 [Solve \"Distinct Permutations of a String\" on GeeksforGeeks](https://www.geeksforgeeks.org/problems/permutations-of-a-given-string2041/1)\n\n**Statistics:**\n- **Difficulty:** Medium\n- **Accuracy:** 34.65%\n- **Total Submissions:** 3,42,835",
+    "source": "gfg"
+  },
+  {
+    "title": "M-Coloring Problem",
+    "topic": "Backtracking",
+    "difficulty": "Medium",
+    "description": "### GeeksforGeeks Problem\n\nThis question is imported from GeeksforGeeks. You can read the full problem statement and submit your solution directly on GFG:\n\n👉 [Solve \"M-Coloring Problem\" on GeeksforGeeks](https://www.geeksforgeeks.org/problems/m-coloring-problem-1587115620/1)\n\n**Statistics:**\n- **Difficulty:** Medium\n- **Accuracy:** 34.42%\n- **Total Submissions:** 1,91,037",
+    "source": "gfg"
+  },
+  {
+    "title": "Solve the Sudoku",
+    "topic": "Backtracking",
+    "difficulty": "Hard",
+    "description": "### GeeksforGeeks Problem\n\nThis question is imported from GeeksforGeeks. You can read the full problem statement and submit your solution directly on GFG:\n\n👉 [Solve \"Solve the Sudoku\" on GeeksforGeeks](https://www.geeksforgeeks.org/problems/solve-the-sudoku-1587115621/1)\n\n**Statistics:**\n- **Difficulty:** Hard\n- **Accuracy:** 37.98%\n- **Total Submissions:** 1,37,065",
+    "source": "gfg"
+  },
+  {
+    "title": "Target Sum Combinations",
+    "topic": "Backtracking",
+    "difficulty": "Medium",
+    "description": "### GeeksforGeeks Problem\n\nThis question is imported from GeeksforGeeks. You can read the full problem statement and submit your solution directly on GFG:\n\n👉 [Solve \"Target Sum Combinations\" on GeeksforGeeks](https://www.geeksforgeeks.org/problems/combination-sum-1587115620/1)\n\n**Statistics:**\n- **Difficulty:** Medium\n- **Accuracy:** 28.28%\n- **Total Submissions:** 1,33,832",
+    "source": "gfg"
+  },
+  {
+    "title": "Largest number in K swaps",
+    "topic": "Backtracking",
+    "difficulty": "Medium",
+    "description": "### GeeksforGeeks Problem\n\nThis question is imported from GeeksforGeeks. You can read the full problem statement and submit your solution directly on GFG:\n\n👉 [Solve \"Largest number in K swaps\" on GeeksforGeeks](https://www.geeksforgeeks.org/problems/largest-number-in-k-swaps-1587115620/1)\n\n**Statistics:**\n- **Difficulty:** Medium\n- **Accuracy:** 18.84%\n- **Total Submissions:** 1,32,695",
+    "source": "gfg"
+  },
+  {
+    "title": "N-Queen Problem",
+    "topic": "Backtracking",
+    "difficulty": "Hard",
+    "description": "### GeeksforGeeks Problem\n\nThis question is imported from GeeksforGeeks. You can read the full problem statement and submit your solution directly on GFG:\n\n👉 [Solve \"N-Queen Problem\" on GeeksforGeeks](https://www.geeksforgeeks.org/problems/n-queen-problem0315/1)\n\n**Statistics:**\n- **Difficulty:** Hard\n- **Accuracy:** 35.43%\n- **Total Submissions:** 1,19,578",
+    "source": "gfg"
+  },
+  {
+    "title": "Possible Words From Phone Digits",
+    "topic": "Backtracking",
+    "difficulty": "Medium",
+    "description": "### GeeksforGeeks Problem\n\nThis question is imported from GeeksforGeeks. You can read the full problem statement and submit your solution directly on GFG:\n\n👉 [Solve \"Possible Words From Phone Digits\" on GeeksforGeeks](https://www.geeksforgeeks.org/problems/possible-words-from-phone-digits-1587115620/1)\n\n**Statistics:**\n- **Difficulty:** Medium\n- **Accuracy:** 52.79%\n- **Total Submissions:** 99,220",
+    "source": "gfg"
+  },
+  {
+    "title": "Word Search",
+    "topic": "Backtracking",
+    "difficulty": "Medium",
+    "description": "### GeeksforGeeks Problem\n\nThis question is imported from GeeksforGeeks. You can read the full problem statement and submit your solution directly on GFG:\n\n👉 [Solve \"Word Search\" on GeeksforGeeks](https://www.geeksforgeeks.org/problems/word-search/1)\n\n**Statistics:**\n- **Difficulty:** Medium\n- **Accuracy:** 32.69%\n- **Total Submissions:** 92,790",
+    "source": "gfg"
+  },
+  {
+    "title": "Word Boggle",
+    "topic": "Backtracking",
+    "difficulty": "Medium",
+    "description": "### GeeksforGeeks Problem\n\nThis question is imported from GeeksforGeeks. You can read the full problem statement and submit your solution directly on GFG:\n\n👉 [Solve \"Word Boggle\" on GeeksforGeeks](https://www.geeksforgeeks.org/problems/word-boggle4143/1)\n\n**Statistics:**\n- **Difficulty:** Medium\n- **Accuracy:** 15.85%\n- **Total Submissions:** 91,811",
+    "source": "gfg"
+  },
+  {
+    "title": "Minimum Jumps",
+    "topic": "Greedy",
+    "difficulty": "Medium",
+    "description": "### GeeksforGeeks Problem\n\nThis question is imported from GeeksforGeeks. You can read the full problem statement and submit your solution directly on GFG:\n\n👉 [Solve \"Minimum Jumps\" on GeeksforGeeks](https://www.geeksforgeeks.org/problems/minimum-number-of-jumps-1587115620/1)\n\n**Statistics:**\n- **Difficulty:** Medium\n- **Accuracy:** 11.91%\n- **Total Submissions:** 10,86,574",
+    "source": "gfg"
+  },
+  {
+    "title": "Majority Element",
+    "topic": "Greedy",
+    "difficulty": "Medium",
+    "description": "### GeeksforGeeks Problem\n\nThis question is imported from GeeksforGeeks. You can read the full problem statement and submit your solution directly on GFG:\n\n👉 [Solve \"Majority Element\" on GeeksforGeeks](https://www.geeksforgeeks.org/problems/majority-element-1587115620/1)\n\n**Statistics:**\n- **Difficulty:** Medium\n- **Accuracy:** 27.82%\n- **Total Submissions:** 8,28,278",
+    "source": "gfg"
+  },
+  {
+    "title": "Minimize the Heights II",
+    "topic": "Greedy",
+    "difficulty": "Medium",
+    "description": "### GeeksforGeeks Problem\n\nThis question is imported from GeeksforGeeks. You can read the full problem statement and submit your solution directly on GFG:\n\n👉 [Solve \"Minimize the Heights II\" on GeeksforGeeks](https://www.geeksforgeeks.org/problems/minimize-the-heights3351/1)\n\n**Statistics:**\n- **Difficulty:** Medium\n- **Accuracy:** 15.06%\n- **Total Submissions:** 7,84,676",
+    "source": "gfg"
+  },
+  {
+    "title": "Minimum Platforms",
+    "topic": "Greedy",
+    "difficulty": "Medium",
+    "description": "### GeeksforGeeks Problem\n\nThis question is imported from GeeksforGeeks. You can read the full problem statement and submit your solution directly on GFG:\n\n👉 [Solve \"Minimum Platforms\" on GeeksforGeeks](https://www.geeksforgeeks.org/problems/minimum-platforms-1587115620/1)\n\n**Statistics:**\n- **Difficulty:** Medium\n- **Accuracy:** 26.84%\n- **Total Submissions:** 6,41,284",
+    "source": "gfg"
+  },
+  {
+    "title": "N meetings in one room",
+    "topic": "Greedy",
+    "difficulty": "Easy",
+    "description": "### GeeksforGeeks Problem\n\nThis question is imported from GeeksforGeeks. You can read the full problem statement and submit your solution directly on GFG:\n\n👉 [Solve \"N meetings in one room\" on GeeksforGeeks](https://www.geeksforgeeks.org/problems/n-meetings-in-one-room-1587115620/1)\n\n**Statistics:**\n- **Difficulty:** Easy\n- **Accuracy:** 45.3%\n- **Total Submissions:** 3,97,748",
+    "source": "gfg"
+  },
+  {
+    "title": "Fractional Knapsack",
+    "topic": "Greedy",
+    "difficulty": "Medium",
+    "description": "### GeeksforGeeks Problem\n\nThis question is imported from GeeksforGeeks. You can read the full problem statement and submit your solution directly on GFG:\n\n👉 [Solve \"Fractional Knapsack\" on GeeksforGeeks](https://www.geeksforgeeks.org/problems/fractional-knapsack-1587115620/1)\n\n**Statistics:**\n- **Difficulty:** Medium\n- **Accuracy:** 32.46%\n- **Total Submissions:** 3,97,234",
+    "source": "gfg"
+  },
+  {
+    "title": "Job Sequencing Problem",
+    "topic": "Greedy",
+    "difficulty": "Medium",
+    "description": "### GeeksforGeeks Problem\n\nThis question is imported from GeeksforGeeks. You can read the full problem statement and submit your solution directly on GFG:\n\n👉 [Solve \"Job Sequencing Problem\" on GeeksforGeeks](https://www.geeksforgeeks.org/problems/job-sequencing-problem-1587115620/1)\n\n**Statistics:**\n- **Difficulty:** Medium\n- **Accuracy:** 34.51%\n- **Total Submissions:** 3,86,162",
+    "source": "gfg"
+  },
+  {
+    "title": "Stock buy and sell",
+    "topic": "Greedy",
+    "difficulty": "Medium",
+    "description": "### GeeksforGeeks Problem\n\nThis question is imported from GeeksforGeeks. You can read the full problem statement and submit your solution directly on GFG:\n\n👉 [Solve \"Stock buy and sell\" on GeeksforGeeks](https://www.geeksforgeeks.org/problems/stock-buy-and-sell-1587115621/1)\n\n**Statistics:**\n- **Difficulty:** Medium\n- **Accuracy:** 29.18%\n- **Total Submissions:** 3,07,505",
+    "source": "gfg"
+  },
+  {
+    "title": "Gas Station",
+    "topic": "Greedy",
+    "difficulty": "Medium",
+    "description": "### GeeksforGeeks Problem\n\nThis question is imported from GeeksforGeeks. You can read the full problem statement and submit your solution directly on GFG:\n\n👉 [Solve \"Gas Station\" on GeeksforGeeks](https://www.geeksforgeeks.org/problems/circular-tour-1587115620/1)\n\n**Statistics:**\n- **Difficulty:** Medium\n- **Accuracy:** 34.79%\n- **Total Submissions:** 2,23,835",
+    "source": "gfg"
+  },
+  {
+    "title": "Activity Selection",
+    "topic": "Greedy",
+    "difficulty": "Medium",
+    "description": "### GeeksforGeeks Problem\n\nThis question is imported from GeeksforGeeks. You can read the full problem statement and submit your solution directly on GFG:\n\n👉 [Solve \"Activity Selection\" on GeeksforGeeks](https://www.geeksforgeeks.org/problems/activity-selection-1587115620/1)\n\n**Statistics:**\n- **Difficulty:** Medium\n- **Accuracy:** 36.21%\n- **Total Submissions:** 2,04,188",
+    "source": "gfg"
+  },
+  {
+    "title": "Indexes of Subarray Sum",
+    "topic": "Binary Search",
+    "difficulty": "Medium",
+    "description": "### GeeksforGeeks Problem\n\nThis question is imported from GeeksforGeeks. You can read the full problem statement and submit your solution directly on GFG:\n\n👉 [Solve \"Indexes of Subarray Sum\" on GeeksforGeeks](https://www.geeksforgeeks.org/problems/subarray-with-given-sum-1587115621/1)\n\n**Statistics:**\n- **Difficulty:** Medium\n- **Accuracy:** 16.5%\n- **Total Submissions:** 19,21,481",
+    "source": "gfg"
+  },
+  {
+    "title": "Missing in Array",
+    "topic": "Binary Search",
+    "difficulty": "Easy",
+    "description": "### GeeksforGeeks Problem\n\nThis question is imported from GeeksforGeeks. You can read the full problem statement and submit your solution directly on GFG:\n\n👉 [Solve \"Missing in Array\" on GeeksforGeeks](https://www.geeksforgeeks.org/problems/missing-number-in-array1416/1)\n\n**Statistics:**\n- **Difficulty:** Easy\n- **Accuracy:** 29.59%\n- **Total Submissions:** 17,01,207",
+    "source": "gfg"
+  },
+  {
+    "title": "Second Largest",
+    "topic": "Binary Search",
+    "difficulty": "Easy",
+    "description": "### GeeksforGeeks Problem\n\nThis question is imported from GeeksforGeeks. You can read the full problem statement and submit your solution directly on GFG:\n\n👉 [Solve \"Second Largest\" on GeeksforGeeks](https://www.geeksforgeeks.org/problems/second-largest3735/1)\n\n**Statistics:**\n- **Difficulty:** Easy\n- **Accuracy:** 26.72%\n- **Total Submissions:** 15,31,184",
+    "source": "gfg"
+  },
+  {
+    "title": "Kth Smallest",
+    "topic": "Binary Search",
+    "difficulty": "Medium",
+    "description": "### GeeksforGeeks Problem\n\nThis question is imported from GeeksforGeeks. You can read the full problem statement and submit your solution directly on GFG:\n\n👉 [Solve \"Kth Smallest\" on GeeksforGeeks](https://www.geeksforgeeks.org/problems/kth-smallest-element5635/1)\n\n**Statistics:**\n- **Difficulty:** Medium\n- **Accuracy:** 35.17%\n- **Total Submissions:** 8,24,621",
+    "source": "gfg"
+  },
+  {
+    "title": "First Occurrence in Sorted",
+    "topic": "Binary Search",
+    "difficulty": "Easy",
+    "description": "### GeeksforGeeks Problem\n\nThis question is imported from GeeksforGeeks. You can read the full problem statement and submit your solution directly on GFG:\n\n👉 [Solve \"First Occurrence in Sorted\" on GeeksforGeeks](https://www.geeksforgeeks.org/problems/binary-search-1587115620/1)\n\n**Statistics:**\n- **Difficulty:** Easy\n- **Accuracy:** 44.32%\n- **Total Submissions:** 7,30,941",
+    "source": "gfg"
+  },
+  {
+    "title": "Array Search",
+    "topic": "Binary Search",
+    "difficulty": "Easy",
+    "description": "### GeeksforGeeks Problem\n\nThis question is imported from GeeksforGeeks. You can read the full problem statement and submit your solution directly on GFG:\n\n👉 [Solve \"Array Search\" on GeeksforGeeks](https://www.geeksforgeeks.org/problems/search-an-element-in-an-array-1587115621/1)\n\n**Statistics:**\n- **Difficulty:** Basic\n- **Accuracy:** 40.95%\n- **Total Submissions:** 7,23,802",
+    "source": "gfg"
+  },
+  {
+    "title": "Peak element",
+    "topic": "Binary Search",
+    "difficulty": "Medium",
+    "description": "### GeeksforGeeks Problem\n\nThis question is imported from GeeksforGeeks. You can read the full problem statement and submit your solution directly on GFG:\n\n👉 [Solve \"Peak element\" on GeeksforGeeks](https://www.geeksforgeeks.org/problems/peak-element/1)\n\n**Statistics:**\n- **Difficulty:** Medium\n- **Accuracy:** 38.86%\n- **Total Submissions:** 6,34,906",
+    "source": "gfg"
+  },
+  {
+    "title": "Floor in a Sorted Array",
+    "topic": "Binary Search",
+    "difficulty": "Easy",
+    "description": "### GeeksforGeeks Problem\n\nThis question is imported from GeeksforGeeks. You can read the full problem statement and submit your solution directly on GFG:\n\n👉 [Solve \"Floor in a Sorted Array\" on GeeksforGeeks](https://www.geeksforgeeks.org/problems/floor-in-a-sorted-array-1587115620/1)\n\n**Statistics:**\n- **Difficulty:** Easy\n- **Accuracy:** 33.75%\n- **Total Submissions:** 5,77,642",
+    "source": "gfg"
+  },
+  {
+    "title": "Array Subset",
+    "topic": "Binary Search",
+    "difficulty": "Easy",
+    "description": "### GeeksforGeeks Problem\n\nThis question is imported from GeeksforGeeks. You can read the full problem statement and submit your solution directly on GFG:\n\n👉 [Solve \"Array Subset\" on GeeksforGeeks](https://www.geeksforgeeks.org/problems/array-subset-of-another-array2317/1)\n\n**Statistics:**\n- **Difficulty:** Basic\n- **Accuracy:** 44.05%\n- **Total Submissions:** 5,60,329",
+    "source": "gfg"
+  },
+  {
+    "title": "Smallest Positive Missing",
+    "topic": "Binary Search",
+    "difficulty": "Medium",
+    "description": "### GeeksforGeeks Problem\n\nThis question is imported from GeeksforGeeks. You can read the full problem statement and submit your solution directly on GFG:\n\n👉 [Solve \"Smallest Positive Missing\" on GeeksforGeeks](https://www.geeksforgeeks.org/problems/smallest-positive-missing-number-1587115621/1)\n\n**Statistics:**\n- **Difficulty:** Medium\n- **Accuracy:** 25.13%\n- **Total Submissions:** 4,75,184",
+    "source": "gfg"
+  },
+  {
+    "title": "Parenthesis Checker",
+    "topic": "Stack",
+    "difficulty": "Easy",
+    "description": "### GeeksforGeeks Problem\n\nThis question is imported from GeeksforGeeks. You can read the full problem statement and submit your solution directly on GFG:\n\n👉 [Solve \"Parenthesis Checker\" on GeeksforGeeks](https://www.geeksforgeeks.org/problems/parenthesis-checker2744/1)\n\n**Statistics:**\n- **Difficulty:** Easy\n- **Accuracy:** 28.56%\n- **Total Submissions:** 7,38,790",
+    "source": "gfg"
+  },
+  {
+    "title": "Trapping Rain Water",
+    "topic": "Stack",
+    "difficulty": "Hard",
+    "description": "### GeeksforGeeks Problem\n\nThis question is imported from GeeksforGeeks. You can read the full problem statement and submit your solution directly on GFG:\n\n👉 [Solve \"Trapping Rain Water\" on GeeksforGeeks](https://www.geeksforgeeks.org/problems/trapping-rain-water-1587115621/1)\n\n**Statistics:**\n- **Difficulty:** Hard\n- **Accuracy:** 33.14%\n- **Total Submissions:** 5,25,589",
+    "source": "gfg"
+  },
+  {
+    "title": "Next Greater Element",
+    "topic": "Stack",
+    "difficulty": "Medium",
+    "description": "### GeeksforGeeks Problem\n\nThis question is imported from GeeksforGeeks. You can read the full problem statement and submit your solution directly on GFG:\n\n👉 [Solve \"Next Greater Element\" on GeeksforGeeks](https://www.geeksforgeeks.org/problems/next-larger-element-1587115620/1)\n\n**Statistics:**\n- **Difficulty:** Medium\n- **Accuracy:** 32.95%\n- **Total Submissions:** 5,22,702",
+    "source": "gfg"
+  },
+  {
+    "title": "The Celebrity Problem",
+    "topic": "Stack",
+    "difficulty": "Medium",
+    "description": "### GeeksforGeeks Problem\n\nThis question is imported from GeeksforGeeks. You can read the full problem statement and submit your solution directly on GFG:\n\n👉 [Solve \"The Celebrity Problem\" on GeeksforGeeks](https://www.geeksforgeeks.org/problems/the-celebrity-problem/1)\n\n**Statistics:**\n- **Difficulty:** Medium\n- **Accuracy:** 38.33%\n- **Total Submissions:** 3,78,513",
+    "source": "gfg"
+  },
+  {
+    "title": "Implement stack using array",
+    "topic": "Stack",
+    "difficulty": "Medium",
+    "description": "### GeeksforGeeks Problem\n\nThis question is imported from GeeksforGeeks. You can read the full problem statement and submit your solution directly on GFG:\n\n👉 [Solve \"Implement stack using array\" on GeeksforGeeks](https://www.geeksforgeeks.org/problems/implement-stack-using-array/1)\n\n**Statistics:**\n- **Difficulty:** Medium\n- **Accuracy:** 54.76%\n- **Total Submissions:** 3,24,426",
+    "source": "gfg"
+  },
+  {
+    "title": "Get Min from Stack",
+    "topic": "Stack",
+    "difficulty": "Medium",
+    "description": "### GeeksforGeeks Problem\n\nThis question is imported from GeeksforGeeks. You can read the full problem statement and submit your solution directly on GFG:\n\n👉 [Solve \"Get Min from Stack\" on GeeksforGeeks](https://www.geeksforgeeks.org/problems/get-minimum-element-from-stack/1)\n\n**Statistics:**\n- **Difficulty:** Medium\n- **Accuracy:** 22.59%\n- **Total Submissions:** 3,03,632",
+    "source": "gfg"
+  },
+  {
+    "title": "Stock span problem",
+    "topic": "Stack",
+    "difficulty": "Medium",
+    "description": "### GeeksforGeeks Problem\n\nThis question is imported from GeeksforGeeks. You can read the full problem statement and submit your solution directly on GFG:\n\n👉 [Solve \"Stock span problem\" on GeeksforGeeks](https://www.geeksforgeeks.org/problems/stock-span-problem-1587115621/1)\n\n**Statistics:**\n- **Difficulty:** Medium\n- **Accuracy:** 43.56%\n- **Total Submissions:** 2,68,795",
+    "source": "gfg"
+  },
+  {
+    "title": "Next Smaller Element",
+    "topic": "Stack",
+    "difficulty": "Medium",
+    "description": "### GeeksforGeeks Problem\n\nThis question is imported from GeeksforGeeks. You can read the full problem statement and submit your solution directly on GFG:\n\n👉 [Solve \"Next Smaller Element\" on GeeksforGeeks](https://www.geeksforgeeks.org/problems/immediate-smaller-element1142/1)\n\n**Statistics:**\n- **Difficulty:** Medium\n- **Accuracy:** 36.26%\n- **Total Submissions:** 2,31,145",
+    "source": "gfg"
+  },
+  {
+    "title": "Histogram Max Rectangular Area",
+    "topic": "Stack",
+    "difficulty": "Hard",
+    "description": "### GeeksforGeeks Problem\n\nThis question is imported from GeeksforGeeks. You can read the full problem statement and submit your solution directly on GFG:\n\n👉 [Solve \"Histogram Max Rectangular Area\" on GeeksforGeeks](https://www.geeksforgeeks.org/problems/maximum-rectangular-area-in-a-histogram-1587115620/1)\n\n**Statistics:**\n- **Difficulty:** Hard\n- **Accuracy:** 32.12%\n- **Total Submissions:** 2,12,321",
+    "source": "gfg"
+  },
+  {
+    "title": "Stack using Linked List",
+    "topic": "Stack",
+    "difficulty": "Easy",
+    "description": "### GeeksforGeeks Problem\n\nThis question is imported from GeeksforGeeks. You can read the full problem statement and submit your solution directly on GFG:\n\n👉 [Solve \"Stack using Linked List\" on GeeksforGeeks](https://www.geeksforgeeks.org/problems/implement-stack-using-linked-list/1)\n\n**Statistics:**\n- **Difficulty:** Easy\n- **Accuracy:** 53.98%\n- **Total Submissions:** 2,07,924",
+    "source": "gfg"
+  },
+  {
+    "title": "K Sized Subarray Maximum",
+    "topic": "Queue",
+    "difficulty": "Medium",
+    "description": "### GeeksforGeeks Problem\n\nThis question is imported from GeeksforGeeks. You can read the full problem statement and submit your solution directly on GFG:\n\n👉 [Solve \"K Sized Subarray Maximum\" on GeeksforGeeks](https://www.geeksforgeeks.org/problems/maximum-of-all-subarrays-of-size-k3101/1)\n\n**Statistics:**\n- **Difficulty:** Medium\n- **Accuracy:** 26.04%\n- **Total Submissions:** 4,80,264",
+    "source": "gfg"
+  },
+  {
+    "title": "Queue Using Array",
+    "topic": "Queue",
+    "difficulty": "Easy",
+    "description": "### GeeksforGeeks Problem\n\nThis question is imported from GeeksforGeeks. You can read the full problem statement and submit your solution directly on GFG:\n\n👉 [Solve \"Queue Using Array\" on GeeksforGeeks](https://www.geeksforgeeks.org/problems/implement-queue-using-array/1)\n\n**Statistics:**\n- **Difficulty:** Basic\n- **Accuracy:** 47.24%\n- **Total Submissions:** 2,88,871",
+    "source": "gfg"
+  },
+  {
+    "title": "Stream First Non-repeating",
+    "topic": "Queue",
+    "difficulty": "Medium",
+    "description": "### GeeksforGeeks Problem\n\nThis question is imported from GeeksforGeeks. You can read the full problem statement and submit your solution directly on GFG:\n\n👉 [Solve \"Stream First Non-repeating\" on GeeksforGeeks](https://www.geeksforgeeks.org/problems/first-non-repeating-character-in-a-stream1216/1)\n\n**Statistics:**\n- **Difficulty:** Medium\n- **Accuracy:** 31.65%\n- **Total Submissions:** 2,41,286",
+    "source": "gfg"
+  },
+  {
+    "title": "First negative in every window of size k",
+    "topic": "Queue",
+    "difficulty": "Medium",
+    "description": "### GeeksforGeeks Problem\n\nThis question is imported from GeeksforGeeks. You can read the full problem statement and submit your solution directly on GFG:\n\n👉 [Solve \"First negative in every window of size k\" on GeeksforGeeks](https://www.geeksforgeeks.org/problems/first-negative-integer-in-every-window-of-size-k3345/1)\n\n**Statistics:**\n- **Difficulty:** Medium\n- **Accuracy:** 48.61%\n- **Total Submissions:** 2,35,369",
+    "source": "gfg"
+  },
+  {
+    "title": "Rotten Oranges",
+    "topic": "Queue",
+    "difficulty": "Medium",
+    "description": "### GeeksforGeeks Problem\n\nThis question is imported from GeeksforGeeks. You can read the full problem statement and submit your solution directly on GFG:\n\n👉 [Solve \"Rotten Oranges\" on GeeksforGeeks](https://www.geeksforgeeks.org/problems/rotten-oranges2536/1)\n\n**Statistics:**\n- **Difficulty:** Medium\n- **Accuracy:** 46.02%\n- **Total Submissions:** 2,11,067",
+    "source": "gfg"
+  },
+  {
+    "title": "Reverse first K of a Queue",
+    "topic": "Queue",
+    "difficulty": "Easy",
+    "description": "### GeeksforGeeks Problem\n\nThis question is imported from GeeksforGeeks. You can read the full problem statement and submit your solution directly on GFG:\n\n👉 [Solve \"Reverse first K of a Queue\" on GeeksforGeeks](https://www.geeksforgeeks.org/problems/reverse-first-k-elements-of-queue/1)\n\n**Statistics:**\n- **Difficulty:** Easy\n- **Accuracy:** 81.28%\n- **Total Submissions:** 1,87,586",
+    "source": "gfg"
+  },
+  {
+    "title": "Queue using Linked List",
+    "topic": "Queue",
+    "difficulty": "Easy",
+    "description": "### GeeksforGeeks Problem\n\nThis question is imported from GeeksforGeeks. You can read the full problem statement and submit your solution directly on GFG:\n\n👉 [Solve \"Queue using Linked List\" on GeeksforGeeks](https://www.geeksforgeeks.org/problems/implement-queue-using-linked-list/1)\n\n**Statistics:**\n- **Difficulty:** Basic\n- **Accuracy:** 45.6%\n- **Total Submissions:** 1,80,686",
+    "source": "gfg"
+  },
+  {
+    "title": "Stack using Queue",
+    "topic": "Queue",
+    "difficulty": "Medium",
+    "description": "### GeeksforGeeks Problem\n\nThis question is imported from GeeksforGeeks. You can read the full problem statement and submit your solution directly on GFG:\n\n👉 [Solve \"Stack using Queue\" on GeeksforGeeks](https://www.geeksforgeeks.org/problems/stack-using-queue/1)\n\n**Statistics:**\n- **Difficulty:** Medium\n- **Accuracy:** 51.4%\n- **Total Submissions:** 1,65,734",
+    "source": "gfg"
+  },
+  {
+    "title": "Queue Reversal",
+    "topic": "Queue",
+    "difficulty": "Easy",
+    "description": "### GeeksforGeeks Problem\n\nThis question is imported from GeeksforGeeks. You can read the full problem statement and submit your solution directly on GFG:\n\n👉 [Solve \"Queue Reversal\" on GeeksforGeeks](https://www.geeksforgeeks.org/problems/queue-reversal/1)\n\n**Statistics:**\n- **Difficulty:** Easy\n- **Accuracy:** 77.98%\n- **Total Submissions:** 1,64,871",
+    "source": "gfg"
+  },
+  {
+    "title": "Queue using two Stacks",
+    "topic": "Queue",
+    "difficulty": "Easy",
+    "description": "### GeeksforGeeks Problem\n\nThis question is imported from GeeksforGeeks. You can read the full problem statement and submit your solution directly on GFG:\n\n👉 [Solve \"Queue using two Stacks\" on GeeksforGeeks](https://www.geeksforgeeks.org/problems/queue-using-two-stacks/1)\n\n**Statistics:**\n- **Difficulty:** Easy\n- **Accuracy:** 58.89%\n- **Total Submissions:** 1,49,150",
+    "source": "gfg"
+  },
+  {
+    "title": "Minimum Cost of ropes",
+    "topic": "Heap",
+    "difficulty": "Medium",
+    "description": "### GeeksforGeeks Problem\n\nThis question is imported from GeeksforGeeks. You can read the full problem statement and submit your solution directly on GFG:\n\n👉 [Solve \"Minimum Cost of ropes\" on GeeksforGeeks](https://www.geeksforgeeks.org/problems/minimum-cost-of-ropes-1587115620/1)\n\n**Statistics:**\n- **Difficulty:** Medium\n- **Accuracy:** 42.73%\n- **Total Submissions:** 2,79,966",
+    "source": "gfg"
+  },
+  {
+    "title": "k largest elements",
+    "topic": "Heap",
+    "difficulty": "Medium",
+    "description": "### GeeksforGeeks Problem\n\nThis question is imported from GeeksforGeeks. You can read the full problem statement and submit your solution directly on GFG:\n\n👉 [Solve \"k largest elements\" on GeeksforGeeks](https://www.geeksforgeeks.org/problems/k-largest-elements4206/1)\n\n**Statistics:**\n- **Difficulty:** Medium\n- **Accuracy:** 53.56%\n- **Total Submissions:** 2,05,939",
+    "source": "gfg"
+  },
+  {
+    "title": "Find median in a stream",
+    "topic": "Heap",
+    "difficulty": "Medium",
+    "description": "### GeeksforGeeks Problem\n\nThis question is imported from GeeksforGeeks. You can read the full problem statement and submit your solution directly on GFG:\n\n👉 [Solve \"Find median in a stream\" on GeeksforGeeks](https://www.geeksforgeeks.org/problems/find-median-in-a-stream-1587115620/1)\n\n**Statistics:**\n- **Difficulty:** Medium\n- **Accuracy:** 30.34%\n- **Total Submissions:** 1,62,005",
+    "source": "gfg"
+  },
+  {
+    "title": "Is Binary Tree Heap",
+    "topic": "Heap",
+    "difficulty": "Medium",
+    "description": "### GeeksforGeeks Problem\n\nThis question is imported from GeeksforGeeks. You can read the full problem statement and submit your solution directly on GFG:\n\n👉 [Solve \"Is Binary Tree Heap\" on GeeksforGeeks](https://www.geeksforgeeks.org/problems/is-binary-tree-heap/1)\n\n**Statistics:**\n- **Difficulty:** Medium\n- **Accuracy:** 34.41%\n- **Total Submissions:** 1,47,222",
+    "source": "gfg"
+  },
+  {
+    "title": "Heap Sort",
+    "topic": "Heap",
+    "difficulty": "Medium",
+    "description": "### GeeksforGeeks Problem\n\nThis question is imported from GeeksforGeeks. You can read the full problem statement and submit your solution directly on GFG:\n\n👉 [Solve \"Heap Sort\" on GeeksforGeeks](https://www.geeksforgeeks.org/problems/heap-sort/1)\n\n**Statistics:**\n- **Difficulty:** Medium\n- **Accuracy:** 53.06%\n- **Total Submissions:** 1,36,173",
+    "source": "gfg"
+  },
+  {
+    "title": "Minimum Cost Path",
+    "topic": "Heap",
+    "difficulty": "Hard",
+    "description": "### GeeksforGeeks Problem\n\nThis question is imported from GeeksforGeeks. You can read the full problem statement and submit your solution directly on GFG:\n\n👉 [Solve \"Minimum Cost Path\" on GeeksforGeeks](https://www.geeksforgeeks.org/problems/minimum-cost-path3833/1)\n\n**Statistics:**\n- **Difficulty:** Hard\n- **Accuracy:** 26.99%\n- **Total Submissions:** 1,32,960",
+    "source": "gfg"
+  },
+  {
+    "title": "Merge k Sorted Arrays",
+    "topic": "Heap",
+    "difficulty": "Medium",
+    "description": "### GeeksforGeeks Problem\n\nThis question is imported from GeeksforGeeks. You can read the full problem statement and submit your solution directly on GFG:\n\n👉 [Solve \"Merge k Sorted Arrays\" on GeeksforGeeks](https://www.geeksforgeeks.org/problems/merge-k-sorted-arrays/1)\n\n**Statistics:**\n- **Difficulty:** Medium\n- **Accuracy:** 67.25%\n- **Total Submissions:** 1,30,624",
+    "source": "gfg"
+  },
+  {
+    "title": "Merge K sorted linked lists",
+    "topic": "Heap",
+    "difficulty": "Medium",
+    "description": "### GeeksforGeeks Problem\n\nThis question is imported from GeeksforGeeks. You can read the full problem statement and submit your solution directly on GFG:\n\n👉 [Solve \"Merge K sorted linked lists\" on GeeksforGeeks](https://www.geeksforgeeks.org/problems/merge-k-sorted-linked-lists/1)\n\n**Statistics:**\n- **Difficulty:** Medium\n- **Accuracy:** 57.01%\n- **Total Submissions:** 1,26,697",
+    "source": "gfg"
+  },
+  {
+    "title": "Maximum Sum Combination",
+    "topic": "Heap",
+    "difficulty": "Medium",
+    "description": "### GeeksforGeeks Problem\n\nThis question is imported from GeeksforGeeks. You can read the full problem statement and submit your solution directly on GFG:\n\n👉 [Solve \"Maximum Sum Combination\" on GeeksforGeeks](https://www.geeksforgeeks.org/problems/maximum-sum-combination/1)\n\n**Statistics:**\n- **Difficulty:** Medium\n- **Accuracy:** 49.69%\n- **Total Submissions:** 1,19,068",
+    "source": "gfg"
+  },
+  {
+    "title": "Binary Heap Operations",
+    "topic": "Heap",
+    "difficulty": "Medium",
+    "description": "### GeeksforGeeks Problem\n\nThis question is imported from GeeksforGeeks. You can read the full problem statement and submit your solution directly on GFG:\n\n👉 [Solve \"Binary Heap Operations\" on GeeksforGeeks](https://www.geeksforgeeks.org/problems/operations-on-binary-min-heap/1)\n\n**Statistics:**\n- **Difficulty:** Medium\n- **Accuracy:** 22.3%\n- **Total Submissions:** 1,14,384",
+    "source": "gfg"
+  },
+  {
+    "title": "Power of 2",
+    "topic": "Bit Magic",
+    "difficulty": "Easy",
+    "description": "### GeeksforGeeks Problem\n\nThis question is imported from GeeksforGeeks. You can read the full problem statement and submit your solution directly on GFG:\n\n👉 [Solve \"Power of 2\" on GeeksforGeeks](https://www.geeksforgeeks.org/problems/power-of-2-1587115620/1)\n\n**Statistics:**\n- **Difficulty:** Easy\n- **Accuracy:** 32.58%\n- **Total Submissions:** 4,55,300",
+    "source": "gfg"
+  },
+  {
+    "title": "Check K-th Bit",
+    "topic": "Bit Magic",
+    "difficulty": "Easy",
+    "description": "### GeeksforGeeks Problem\n\nThis question is imported from GeeksforGeeks. You can read the full problem statement and submit your solution directly on GFG:\n\n👉 [Solve \"Check K-th Bit\" on GeeksforGeeks](https://www.geeksforgeeks.org/problems/check-whether-k-th-bit-is-set-or-not-1587115620/1)\n\n**Statistics:**\n- **Difficulty:** Easy\n- **Accuracy:** 52.75%\n- **Total Submissions:** 2,74,403",
+    "source": "gfg"
+  },
+  {
+    "title": "Count set bits in 1 to n",
+    "topic": "Bit Magic",
+    "difficulty": "Medium",
+    "description": "### GeeksforGeeks Problem\n\nThis question is imported from GeeksforGeeks. You can read the full problem statement and submit your solution directly on GFG:\n\n👉 [Solve \"Count set bits in 1 to n\" on GeeksforGeeks](https://www.geeksforgeeks.org/problems/count-total-set-bits-1587115620/1)\n\n**Statistics:**\n- **Difficulty:** Medium\n- **Accuracy:** 35.77%\n- **Total Submissions:** 2,62,081",
+    "source": "gfg"
+  },
+  {
+    "title": "Odd or Even",
+    "topic": "Bit Magic",
+    "difficulty": "Easy",
+    "description": "### GeeksforGeeks Problem\n\nThis question is imported from GeeksforGeeks. You can read the full problem statement and submit your solution directly on GFG:\n\n👉 [Solve \"Odd or Even\" on GeeksforGeeks](https://www.geeksforgeeks.org/problems/odd-or-even3618/1)\n\n**Statistics:**\n- **Difficulty:** Basic\n- **Accuracy:** 60.6%\n- **Total Submissions:** 2,35,247",
+    "source": "gfg"
+  },
+  {
+    "title": "First Set Bit",
+    "topic": "Bit Magic",
+    "difficulty": "Easy",
+    "description": "### GeeksforGeeks Problem\n\nThis question is imported from GeeksforGeeks. You can read the full problem statement and submit your solution directly on GFG:\n\n👉 [Solve \"First Set Bit\" on GeeksforGeeks](https://www.geeksforgeeks.org/problems/find-first-set-bit-1587115620/1)\n\n**Statistics:**\n- **Difficulty:** Easy\n- **Accuracy:** 46.89%\n- **Total Submissions:** 1,81,553",
+    "source": "gfg"
+  },
+  {
+    "title": "Count Set Bits",
+    "topic": "Bit Magic",
+    "difficulty": "Easy",
+    "description": "### GeeksforGeeks Problem\n\nThis question is imported from GeeksforGeeks. You can read the full problem statement and submit your solution directly on GFG:\n\n👉 [Solve \"Count Set Bits\" on GeeksforGeeks](https://www.geeksforgeeks.org/problems/set-bits0143/1)\n\n**Statistics:**\n- **Difficulty:** Easy\n- **Accuracy:** 76.5%\n- **Total Submissions:** 1,80,405",
+    "source": "gfg"
+  },
+  {
+    "title": "Unique Number II",
+    "topic": "Bit Magic",
+    "difficulty": "Medium",
+    "description": "### GeeksforGeeks Problem\n\nThis question is imported from GeeksforGeeks. You can read the full problem statement and submit your solution directly on GFG:\n\n👉 [Solve \"Unique Number II\" on GeeksforGeeks](https://www.geeksforgeeks.org/problems/finding-the-numbers0215/1)\n\n**Statistics:**\n- **Difficulty:** Medium\n- **Accuracy:** 36.9%\n- **Total Submissions:** 1,78,131",
+    "source": "gfg"
+  },
+  {
+    "title": "Unique Number I",
+    "topic": "Bit Magic",
+    "difficulty": "Easy",
+    "description": "### GeeksforGeeks Problem\n\nThis question is imported from GeeksforGeeks. You can read the full problem statement and submit your solution directly on GFG:\n\n👉 [Solve \"Unique Number I\" on GeeksforGeeks](https://www.geeksforgeeks.org/problems/find-unique-number/1)\n\n**Statistics:**\n- **Difficulty:** Easy\n- **Accuracy:** 61.81%\n- **Total Submissions:** 1,72,755",
+    "source": "gfg"
+  },
+  {
+    "title": "Rightmost different bit",
+    "topic": "Bit Magic",
+    "difficulty": "Easy",
+    "description": "### GeeksforGeeks Problem\n\nThis question is imported from GeeksforGeeks. You can read the full problem statement and submit your solution directly on GFG:\n\n👉 [Solve \"Rightmost different bit\" on GeeksforGeeks](https://www.geeksforgeeks.org/problems/rightmost-different-bit-1587115621/1)\n\n**Statistics:**\n- **Difficulty:** Easy\n- **Accuracy:** 61.61%\n- **Total Submissions:** 1,28,536",
+    "source": "gfg"
+  },
+  {
+    "title": "Power Set",
+    "topic": "Bit Magic",
+    "difficulty": "Medium",
+    "description": "### GeeksforGeeks Problem\n\nThis question is imported from GeeksforGeeks. You can read the full problem statement and submit your solution directly on GFG:\n\n👉 [Solve \"Power Set\" on GeeksforGeeks](https://www.geeksforgeeks.org/problems/power-set4302/1)\n\n**Statistics:**\n- **Difficulty:** Medium\n- **Accuracy:** 43.3%\n- **Total Submissions:** 1,20,373",
+    "source": "gfg"
+  },
+  {
+    "title": "Spirally traversing a matrix",
+    "topic": "Matrix",
+    "difficulty": "Medium",
+    "description": "### GeeksforGeeks Problem\n\nThis question is imported from GeeksforGeeks. You can read the full problem statement and submit your solution directly on GFG:\n\n👉 [Solve \"Spirally traversing a matrix\" on GeeksforGeeks](https://www.geeksforgeeks.org/problems/spirally-traversing-a-matrix-1587115621/1)\n\n**Statistics:**\n- **Difficulty:** Medium\n- **Accuracy:** 35.2%\n- **Total Submissions:** 3,49,626",
+    "source": "gfg"
+  },
+  {
+    "title": "Rotate by 90 degree",
+    "topic": "Matrix",
+    "difficulty": "Medium",
+    "description": "### GeeksforGeeks Problem\n\nThis question is imported from GeeksforGeeks. You can read the full problem statement and submit your solution directly on GFG:\n\n👉 [Solve \"Rotate by 90 degree\" on GeeksforGeeks](https://www.geeksforgeeks.org/problems/rotate-by-90-degree-1587115621/1)\n\n**Statistics:**\n- **Difficulty:** Medium\n- **Accuracy:** 56.88%\n- **Total Submissions:** 2,10,142",
+    "source": "gfg"
+  },
+  {
+    "title": "Search in a Row-Column Sorted",
+    "topic": "Matrix",
+    "difficulty": "Easy",
+    "description": "### GeeksforGeeks Problem\n\nThis question is imported from GeeksforGeeks. You can read the full problem statement and submit your solution directly on GFG:\n\n👉 [Solve \"Search in a Row-Column Sorted\" on GeeksforGeeks](https://www.geeksforgeeks.org/problems/search-in-a-matrix17201720/1)\n\n**Statistics:**\n- **Difficulty:** Easy\n- **Accuracy:** 41.62%\n- **Total Submissions:** 2,03,343",
+    "source": "gfg"
+  },
+  {
+    "title": "Matrix Chain Multiplication",
+    "topic": "Matrix",
+    "difficulty": "Hard",
+    "description": "### GeeksforGeeks Problem\n\nThis question is imported from GeeksforGeeks. You can read the full problem statement and submit your solution directly on GFG:\n\n👉 [Solve \"Matrix Chain Multiplication\" on GeeksforGeeks](https://www.geeksforgeeks.org/problems/matrix-chain-multiplication0303/1)\n\n**Statistics:**\n- **Difficulty:** Hard\n- **Accuracy:** 49.64%\n- **Total Submissions:** 1,93,389",
+    "source": "gfg"
+  },
+  {
+    "title": "Median in a row-wise sorted Matrix",
+    "topic": "Matrix",
+    "difficulty": "Medium",
+    "description": "### GeeksforGeeks Problem\n\nThis question is imported from GeeksforGeeks. You can read the full problem statement and submit your solution directly on GFG:\n\n👉 [Solve \"Median in a row-wise sorted Matrix\" on GeeksforGeeks](https://www.geeksforgeeks.org/problems/median-in-a-row-wise-sorted-matrix1527/1)\n\n**Statistics:**\n- **Difficulty:** Medium\n- **Accuracy:** 55.05%\n- **Total Submissions:** 1,76,513",
+    "source": "gfg"
+  },
+  {
+    "title": "Flood fill Algorithm",
+    "topic": "Matrix",
+    "difficulty": "Medium",
+    "description": "### GeeksforGeeks Problem\n\nThis question is imported from GeeksforGeeks. You can read the full problem statement and submit your solution directly on GFG:\n\n👉 [Solve \"Flood fill Algorithm\" on GeeksforGeeks](https://www.geeksforgeeks.org/problems/flood-fill-algorithm1856/1)\n\n**Statistics:**\n- **Difficulty:** Medium\n- **Accuracy:** 41.11%\n- **Total Submissions:** 1,59,834",
+    "source": "gfg"
+  },
+  {
+    "title": "Search in a sorted Matrix",
+    "topic": "Matrix",
+    "difficulty": "Medium",
+    "description": "### GeeksforGeeks Problem\n\nThis question is imported from GeeksforGeeks. You can read the full problem statement and submit your solution directly on GFG:\n\n👉 [Solve \"Search in a sorted Matrix\" on GeeksforGeeks](https://www.geeksforgeeks.org/problems/search-in-a-matrix-1587115621/1)\n\n**Statistics:**\n- **Difficulty:** Medium\n- **Accuracy:** 56.27%\n- **Total Submissions:** 1,56,698",
+    "source": "gfg"
+  },
+  {
+    "title": "Replace O's with X's",
+    "topic": "Matrix",
+    "difficulty": "Medium",
+    "description": "### GeeksforGeeks Problem\n\nThis question is imported from GeeksforGeeks. You can read the full problem statement and submit your solution directly on GFG:\n\n👉 [Solve \"Replace O's with X's\" on GeeksforGeeks](https://www.geeksforgeeks.org/problems/replace-os-with-xs0052/1)\n\n**Statistics:**\n- **Difficulty:** Medium\n- **Accuracy:** 34.0%\n- **Total Submissions:** 1,38,723",
+    "source": "gfg"
+  },
+  {
+    "title": "Transpose of Matrix",
+    "topic": "Matrix",
+    "difficulty": "Easy",
+    "description": "### GeeksforGeeks Problem\n\nThis question is imported from GeeksforGeeks. You can read the full problem statement and submit your solution directly on GFG:\n\n👉 [Solve \"Transpose of Matrix\" on GeeksforGeeks](https://www.geeksforgeeks.org/problems/transpose-of-matrix-1587115621/1)\n\n**Statistics:**\n- **Difficulty:** Easy\n- **Accuracy:** 66.5%\n- **Total Submissions:** 1,32,675",
+    "source": "gfg"
+  },
+  {
+    "title": "Max  rectangle",
+    "topic": "Matrix",
+    "difficulty": "Hard",
+    "description": "### GeeksforGeeks Problem\n\nThis question is imported from GeeksforGeeks. You can read the full problem statement and submit your solution directly on GFG:\n\n👉 [Solve \"Max  rectangle\" on GeeksforGeeks](https://www.geeksforgeeks.org/problems/max-rectangle/1)\n\n**Statistics:**\n- **Difficulty:** Hard\n- **Accuracy:** 36.43%\n- **Total Submissions:** 1,32,558",
+    "source": "gfg"
+  },
+  {
+    "title": "Sort 0s, 1s and 2s",
+    "topic": "Sorting",
+    "difficulty": "Medium",
+    "description": "### GeeksforGeeks Problem\n\nThis question is imported from GeeksforGeeks. You can read the full problem statement and submit your solution directly on GFG:\n\n👉 [Solve \"Sort 0s, 1s and 2s\" on GeeksforGeeks](https://www.geeksforgeeks.org/problems/sort-an-array-of-0s-1s-and-2s4231/1)\n\n**Statistics:**\n- **Difficulty:** Medium\n- **Accuracy:** 50.58%\n- **Total Submissions:** 8,63,264",
+    "source": "gfg"
+  },
+  {
+    "title": "Count Inversions",
+    "topic": "Sorting",
+    "difficulty": "Medium",
+    "description": "### GeeksforGeeks Problem\n\nThis question is imported from GeeksforGeeks. You can read the full problem statement and submit your solution directly on GFG:\n\n👉 [Solve \"Count Inversions\" on GeeksforGeeks](https://www.geeksforgeeks.org/problems/inversion-of-array-1587115620/1)\n\n**Statistics:**\n- **Difficulty:** Medium\n- **Accuracy:** 16.93%\n- **Total Submissions:** 7,73,952",
+    "source": "gfg"
+  },
+  {
+    "title": "Two sum -Pairs with 0 Sum",
+    "topic": "Sorting",
+    "difficulty": "Easy",
+    "description": "### GeeksforGeeks Problem\n\nThis question is imported from GeeksforGeeks. You can read the full problem statement and submit your solution directly on GFG:\n\n👉 [Solve \"Two sum -Pairs with 0 Sum\" on GeeksforGeeks](https://www.geeksforgeeks.org/problems/count-pairs-with-given-sum5022/1)\n\n**Statistics:**\n- **Difficulty:** Easy\n- **Accuracy:** 31.49%\n- **Total Submissions:** 5,37,464",
+    "source": "gfg"
+  },
+  {
+    "title": "Anagram",
+    "topic": "Sorting",
+    "difficulty": "Easy",
+    "description": "### GeeksforGeeks Problem\n\nThis question is imported from GeeksforGeeks. You can read the full problem statement and submit your solution directly on GFG:\n\n👉 [Solve \"Anagram\" on GeeksforGeeks](https://www.geeksforgeeks.org/problems/anagram-1587115620/1)\n\n**Statistics:**\n- **Difficulty:** Easy\n- **Accuracy:** 44.93%\n- **Total Submissions:** 4,84,196",
+    "source": "gfg"
+  },
+  {
+    "title": "Check Equal Arrays",
+    "topic": "Sorting",
+    "difficulty": "Easy",
+    "description": "### GeeksforGeeks Problem\n\nThis question is imported from GeeksforGeeks. You can read the full problem statement and submit your solution directly on GFG:\n\n👉 [Solve \"Check Equal Arrays\" on GeeksforGeeks](https://www.geeksforgeeks.org/problems/check-if-two-arrays-are-equal-or-not3847/1)\n\n**Statistics:**\n- **Difficulty:** Easy\n- **Accuracy:** 42.18%\n- **Total Submissions:** 4,33,370",
+    "source": "gfg"
+  },
+  {
+    "title": "Check if array is sorted",
+    "topic": "Sorting",
+    "difficulty": "Easy",
+    "description": "### GeeksforGeeks Problem\n\nThis question is imported from GeeksforGeeks. You can read the full problem statement and submit your solution directly on GFG:\n\n👉 [Solve \"Check if array is sorted\" on GeeksforGeeks](https://www.geeksforgeeks.org/problems/check-if-an-array-is-sorted0701/1)\n\n**Statistics:**\n- **Difficulty:** Easy\n- **Accuracy:** 39.37%\n- **Total Submissions:** 3,95,764",
+    "source": "gfg"
+  },
+  {
+    "title": "Triplet Sum in Array",
+    "topic": "Sorting",
+    "difficulty": "Medium",
+    "description": "### GeeksforGeeks Problem\n\nThis question is imported from GeeksforGeeks. You can read the full problem statement and submit your solution directly on GFG:\n\n👉 [Solve \"Triplet Sum in Array\" on GeeksforGeeks](https://www.geeksforgeeks.org/problems/triplet-sum-in-array-1587115621/1)\n\n**Statistics:**\n- **Difficulty:** Medium\n- **Accuracy:** 35.0%\n- **Total Submissions:** 3,74,713",
+    "source": "gfg"
+  },
+  {
+    "title": "Bubble Sort",
+    "topic": "Sorting",
+    "difficulty": "Easy",
+    "description": "### GeeksforGeeks Problem\n\nThis question is imported from GeeksforGeeks. You can read the full problem statement and submit your solution directly on GFG:\n\n👉 [Solve \"Bubble Sort\" on GeeksforGeeks](https://www.geeksforgeeks.org/problems/bubble-sort/1)\n\n**Statistics:**\n- **Difficulty:** Easy\n- **Accuracy:** 59.33%\n- **Total Submissions:** 3,55,273",
+    "source": "gfg"
+  },
+  {
+    "title": "Find triplets with zero sum",
+    "topic": "Sorting",
+    "difficulty": "Medium",
+    "description": "### GeeksforGeeks Problem\n\nThis question is imported from GeeksforGeeks. You can read the full problem statement and submit your solution directly on GFG:\n\n👉 [Solve \"Find triplets with zero sum\" on GeeksforGeeks](https://www.geeksforgeeks.org/problems/find-triplets-with-zero-sum/1)\n\n**Statistics:**\n- **Difficulty:** Medium\n- **Accuracy:** 25.81%\n- **Total Submissions:** 3,55,034",
+    "source": "gfg"
+  },
+  {
+    "title": "Merge Without Extra Space",
+    "topic": "Sorting",
+    "difficulty": "Medium",
+    "description": "### GeeksforGeeks Problem\n\nThis question is imported from GeeksforGeeks. You can read the full problem statement and submit your solution directly on GFG:\n\n👉 [Solve \"Merge Without Extra Space\" on GeeksforGeeks](https://www.geeksforgeeks.org/problems/merge-two-sorted-arrays-1587115620/1)\n\n**Statistics:**\n- **Difficulty:** Medium\n- **Accuracy:** 32.01%\n- **Total Submissions:** 3,35,314",
+    "source": "gfg"
+  },
+  {
+    "title": "1 to n Without Loops",
+    "topic": "Recursion",
+    "difficulty": "Easy",
+    "description": "### GeeksforGeeks Problem\n\nThis question is imported from GeeksforGeeks. You can read the full problem statement and submit your solution directly on GFG:\n\n👉 [Solve \"1 to n Without Loops\" on GeeksforGeeks](https://www.geeksforgeeks.org/problems/print-1-to-n-without-using-loops3621/1)\n\n**Statistics:**\n- **Difficulty:** Basic\n- **Accuracy:** 47.21%\n- **Total Submissions:** 4,16,888",
+    "source": "gfg"
+  },
+  {
+    "title": "Power Of Numbers",
+    "topic": "Recursion",
+    "difficulty": "Medium",
+    "description": "### GeeksforGeeks Problem\n\nThis question is imported from GeeksforGeeks. You can read the full problem statement and submit your solution directly on GFG:\n\n👉 [Solve \"Power Of Numbers\" on GeeksforGeeks](https://www.geeksforgeeks.org/problems/power-of-numbers-1587115620/1)\n\n**Statistics:**\n- **Difficulty:** Medium\n- **Accuracy:** 20.22%\n- **Total Submissions:** 3,76,955",
+    "source": "gfg"
+  },
+  {
+    "title": "1 to n Without Loops",
+    "topic": "Recursion",
+    "difficulty": "Easy",
+    "description": "### GeeksforGeeks Problem\n\nThis question is imported from GeeksforGeeks. You can read the full problem statement and submit your solution directly on GFG:\n\n👉 [Solve \"1 to n Without Loops\" on GeeksforGeeks](https://www.geeksforgeeks.org/problems/print-1-to-n-without-using-loops-1587115620/1)\n\n**Statistics:**\n- **Difficulty:** Basic\n- **Accuracy:** 61.33%\n- **Total Submissions:** 3,46,118",
+    "source": "gfg"
+  },
+  {
+    "title": "Recursively Remove All Adjacent Duplicates",
+    "topic": "Recursion",
+    "difficulty": "Medium",
+    "description": "### GeeksforGeeks Problem\n\nThis question is imported from GeeksforGeeks. You can read the full problem statement and submit your solution directly on GFG:\n\n👉 [Solve \"Recursively Remove All Adjacent Duplicates\" on GeeksforGeeks](https://www.geeksforgeeks.org/problems/recursively-remove-all-adjacent-duplicates0744/1)\n\n**Statistics:**\n- **Difficulty:** Medium\n- **Accuracy:** 14.88%\n- **Total Submissions:** 1,94,757",
+    "source": "gfg"
+  },
+  {
+    "title": "Tower Of Hanoi",
+    "topic": "Recursion",
+    "difficulty": "Medium",
+    "description": "### GeeksforGeeks Problem\n\nThis question is imported from GeeksforGeeks. You can read the full problem statement and submit your solution directly on GFG:\n\n👉 [Solve \"Tower Of Hanoi\" on GeeksforGeeks](https://www.geeksforgeeks.org/problems/tower-of-hanoi-1587115621/1)\n\n**Statistics:**\n- **Difficulty:** Medium\n- **Accuracy:** 35.23%\n- **Total Submissions:** 1,94,552",
+    "source": "gfg"
+  },
+  {
+    "title": "Subset Sums",
+    "topic": "Recursion",
+    "difficulty": "Medium",
+    "description": "### GeeksforGeeks Problem\n\nThis question is imported from GeeksforGeeks. You can read the full problem statement and submit your solution directly on GFG:\n\n👉 [Solve \"Subset Sums\" on GeeksforGeeks](https://www.geeksforgeeks.org/problems/subset-sums2234/1)\n\n**Statistics:**\n- **Difficulty:** Medium\n- **Accuracy:** 72.55%\n- **Total Submissions:** 1,90,478",
+    "source": "gfg"
+  },
+  {
+    "title": "Josephus problem",
+    "topic": "Recursion",
+    "difficulty": "Easy",
+    "description": "### GeeksforGeeks Problem\n\nThis question is imported from GeeksforGeeks. You can read the full problem statement and submit your solution directly on GFG:\n\n👉 [Solve \"Josephus problem\" on GeeksforGeeks](https://www.geeksforgeeks.org/problems/josephus-problem/1)\n\n**Statistics:**\n- **Difficulty:** Easy\n- **Accuracy:** 57.26%\n- **Total Submissions:** 1,83,302",
+    "source": "gfg"
+  },
+  {
+    "title": "Delete Mid of a Stack",
+    "topic": "Recursion",
+    "difficulty": "Easy",
+    "description": "### GeeksforGeeks Problem\n\nThis question is imported from GeeksforGeeks. You can read the full problem statement and submit your solution directly on GFG:\n\n👉 [Solve \"Delete Mid of a Stack\" on GeeksforGeeks](https://www.geeksforgeeks.org/problems/delete-middle-element-of-a-stack/1)\n\n**Statistics:**\n- **Difficulty:** Easy\n- **Accuracy:** 53.71%\n- **Total Submissions:** 1,81,165",
+    "source": "gfg"
+  },
+  {
+    "title": "Sort a stack",
+    "topic": "Recursion",
+    "difficulty": "Medium",
+    "description": "### GeeksforGeeks Problem\n\nThis question is imported from GeeksforGeeks. You can read the full problem statement and submit your solution directly on GFG:\n\n👉 [Solve \"Sort a stack\" on GeeksforGeeks](https://www.geeksforgeeks.org/problems/sort-a-stack/1)\n\n**Statistics:**\n- **Difficulty:** Medium\n- **Accuracy:** 69.19%\n- **Total Submissions:** 1,78,012",
+    "source": "gfg"
+  },
+  {
+    "title": "Root to Leaf Paths",
+    "topic": "Recursion",
+    "difficulty": "Medium",
+    "description": "### GeeksforGeeks Problem\n\nThis question is imported from GeeksforGeeks. You can read the full problem statement and submit your solution directly on GFG:\n\n👉 [Solve \"Root to Leaf Paths\" on GeeksforGeeks](https://www.geeksforgeeks.org/problems/root-to-leaf-paths/1)\n\n**Statistics:**\n- **Difficulty:** Medium\n- **Accuracy:** 43.65%\n- **Total Submissions:** 1,72,913",
+    "source": "gfg"
+  },
+  {
+    "title": "Reverse a String",
+    "topic": "Strings",
+    "difficulty": "Easy",
+    "description": "### GeeksforGeeks Problem\n\nThis question is imported from GeeksforGeeks. You can read the full problem statement and submit your solution directly on GFG:\n\n👉 [Solve \"Reverse a String\" on GeeksforGeeks](https://www.geeksforgeeks.org/problems/reverse-a-string/1)\n\n**Statistics:**\n- **Difficulty:** Basic\n- **Accuracy:** 69.49%\n- **Total Submissions:** 5,96,326",
+    "source": "gfg"
+  },
+  {
+    "title": "Palindrome String",
+    "topic": "Strings",
+    "difficulty": "Easy",
+    "description": "### GeeksforGeeks Problem\n\nThis question is imported from GeeksforGeeks. You can read the full problem statement and submit your solution directly on GFG:\n\n👉 [Solve \"Palindrome String\" on GeeksforGeeks](https://www.geeksforgeeks.org/problems/palindrome-string0817/1)\n\n**Statistics:**\n- **Difficulty:** Easy\n- **Accuracy:** 51.21%\n- **Total Submissions:** 4,93,393",
+    "source": "gfg"
+  },
+  {
+    "title": "Reverse Words",
+    "topic": "Strings",
+    "difficulty": "Easy",
+    "description": "### GeeksforGeeks Problem\n\nThis question is imported from GeeksforGeeks. You can read the full problem statement and submit your solution directly on GFG:\n\n👉 [Solve \"Reverse Words\" on GeeksforGeeks](https://www.geeksforgeeks.org/problems/reverse-words-in-a-given-string5459/1)\n\n**Statistics:**\n- **Difficulty:** Easy\n- **Accuracy:** 56.08%\n- **Total Submissions:** 4,48,041",
+    "source": "gfg"
+  },
+  {
+    "title": "Strings Rotations of Each Other",
+    "topic": "Strings",
+    "difficulty": "Medium",
+    "description": "### GeeksforGeeks Problem\n\nThis question is imported from GeeksforGeeks. You can read the full problem statement and submit your solution directly on GFG:\n\n👉 [Solve \"Strings Rotations of Each Other\" on GeeksforGeeks](https://www.geeksforgeeks.org/problems/check-if-strings-are-rotations-of-each-other-or-not-1587115620/1)\n\n**Statistics:**\n- **Difficulty:** Medium\n- **Accuracy:** 43.83%\n- **Total Submissions:** 3,58,928",
+    "source": "gfg"
+  },
+  {
+    "title": "Longest Palindrome in a String",
+    "topic": "Strings",
+    "difficulty": "Medium",
+    "description": "### GeeksforGeeks Problem\n\nThis question is imported from GeeksforGeeks. You can read the full problem statement and submit your solution directly on GFG:\n\n👉 [Solve \"Longest Palindrome in a String\" on GeeksforGeeks](https://www.geeksforgeeks.org/problems/longest-palindrome-in-a-string3411/1)\n\n**Statistics:**\n- **Difficulty:** Medium\n- **Accuracy:** 23.2%\n- **Total Submissions:** 3,48,231",
+    "source": "gfg"
+  },
+  {
+    "title": "Non Repeating Character",
+    "topic": "Strings",
+    "difficulty": "Easy",
+    "description": "### GeeksforGeeks Problem\n\nThis question is imported from GeeksforGeeks. You can read the full problem statement and submit your solution directly on GFG:\n\n👉 [Solve \"Non Repeating Character\" on GeeksforGeeks](https://www.geeksforgeeks.org/problems/non-repeating-character-1587115620/1)\n\n**Statistics:**\n- **Difficulty:** Easy\n- **Accuracy:** 40.43%\n- **Total Submissions:** 3,44,257",
+    "source": "gfg"
+  },
+  {
+    "title": "Longest Common Substring",
+    "topic": "Strings",
+    "difficulty": "Medium",
+    "description": "### GeeksforGeeks Problem\n\nThis question is imported from GeeksforGeeks. You can read the full problem statement and submit your solution directly on GFG:\n\n👉 [Solve \"Longest Common Substring\" on GeeksforGeeks](https://www.geeksforgeeks.org/problems/longest-common-substring1452/1)\n\n**Statistics:**\n- **Difficulty:** Medium\n- **Accuracy:** 42.69%\n- **Total Submissions:** 3,31,596",
+    "source": "gfg"
+  },
+  {
+    "title": "Longest Common Prefix of Strings",
+    "topic": "Strings",
+    "difficulty": "Easy",
+    "description": "### GeeksforGeeks Problem\n\nThis question is imported from GeeksforGeeks. You can read the full problem statement and submit your solution directly on GFG:\n\n👉 [Solve \"Longest Common Prefix of Strings\" on GeeksforGeeks](https://www.geeksforgeeks.org/problems/longest-common-prefix-in-an-array5129/1)\n\n**Statistics:**\n- **Difficulty:** Easy\n- **Accuracy:** 29.52%\n- **Total Submissions:** 3,21,262",
+    "source": "gfg"
+  },
+  {
+    "title": "Validate an IP Address",
+    "topic": "Strings",
+    "difficulty": "Medium",
+    "description": "### GeeksforGeeks Problem\n\nThis question is imported from GeeksforGeeks. You can read the full problem statement and submit your solution directly on GFG:\n\n👉 [Solve \"Validate an IP Address\" on GeeksforGeeks](https://www.geeksforgeeks.org/problems/validate-an-ip-address-1587115621/1)\n\n**Statistics:**\n- **Difficulty:** Medium\n- **Accuracy:** 11.22%\n- **Total Submissions:** 3,07,922",
+    "source": "gfg"
+  },
+  {
+    "title": "Implement Atoi",
+    "topic": "Strings",
+    "difficulty": "Medium",
+    "description": "### GeeksforGeeks Problem\n\nThis question is imported from GeeksforGeeks. You can read the full problem statement and submit your solution directly on GFG:\n\n👉 [Solve \"Implement Atoi\" on GeeksforGeeks](https://www.geeksforgeeks.org/problems/implement-atoi/1)\n\n**Statistics:**\n- **Difficulty:** Medium\n- **Accuracy:** 32.58%\n- **Total Submissions:** 3,03,928",
+    "source": "gfg"
+  },
+  {
+    "title": "Array Leaders",
+    "topic": "Arrays",
+    "difficulty": "Easy",
+    "description": "### GeeksforGeeks Problem\n\nThis question is imported from GeeksforGeeks. You can read the full problem statement and submit your solution directly on GFG:\n\n👉 [Solve \"Array Leaders\" on GeeksforGeeks](https://www.geeksforgeeks.org/problems/leaders-in-an-array-1587115620/1)\n\n**Statistics:**\n- **Difficulty:** Easy\n- **Accuracy:** 29.94%\n- **Total Submissions:** 10,12,648",
+    "source": "gfg"
+  },
+  {
+    "title": "Array Duplicates",
+    "topic": "Arrays",
+    "difficulty": "Easy",
+    "description": "### GeeksforGeeks Problem\n\nThis question is imported from GeeksforGeeks. You can read the full problem statement and submit your solution directly on GFG:\n\n👉 [Solve \"Array Duplicates\" on GeeksforGeeks](https://www.geeksforgeeks.org/problems/find-duplicates-in-an-array/1)\n\n**Statistics:**\n- **Difficulty:** Easy\n- **Accuracy:** 18.95%\n- **Total Submissions:** 9,20,114",
+    "source": "gfg"
+  },
+  {
+    "title": "Longest Subarray with Sum K",
+    "topic": "Arrays",
+    "difficulty": "Medium",
+    "description": "### GeeksforGeeks Problem\n\nThis question is imported from GeeksforGeeks. You can read the full problem statement and submit your solution directly on GFG:\n\n👉 [Solve \"Longest Subarray with Sum K\" on GeeksforGeeks](https://www.geeksforgeeks.org/problems/longest-sub-array-with-sum-k0809/1)\n\n**Statistics:**\n- **Difficulty:** Medium\n- **Accuracy:** 24.64%\n- **Total Submissions:** 8,20,162",
+    "source": "gfg"
+  },
+  {
+    "title": "Rotate Array",
+    "topic": "Arrays",
+    "difficulty": "Medium",
+    "description": "### GeeksforGeeks Problem\n\nThis question is imported from GeeksforGeeks. You can read the full problem statement and submit your solution directly on GFG:\n\n👉 [Solve \"Rotate Array\" on GeeksforGeeks](https://www.geeksforgeeks.org/problems/rotate-array-by-n-elements-1587115621/1)\n\n**Statistics:**\n- **Difficulty:** Medium\n- **Accuracy:** 37.06%\n- **Total Submissions:** 7,45,597",
+    "source": "gfg"
+  },
+  {
+    "title": "Missing And Repeating",
+    "topic": "Arrays",
+    "difficulty": "Easy",
+    "description": "### GeeksforGeeks Problem\n\nThis question is imported from GeeksforGeeks. You can read the full problem statement and submit your solution directly on GFG:\n\n👉 [Solve \"Missing And Repeating\" on GeeksforGeeks](https://www.geeksforgeeks.org/problems/find-missing-and-repeating2512/1)\n\n**Statistics:**\n- **Difficulty:** Easy\n- **Accuracy:** 24.83%\n- **Total Submissions:** 7,03,432",
+    "source": "gfg"
+  },
+  {
+    "title": "Equilibrium Point",
+    "topic": "Arrays",
+    "difficulty": "Easy",
+    "description": "### GeeksforGeeks Problem\n\nThis question is imported from GeeksforGeeks. You can read the full problem statement and submit your solution directly on GFG:\n\n👉 [Solve \"Equilibrium Point\" on GeeksforGeeks](https://www.geeksforgeeks.org/problems/equilibrium-point-1587115620/1)\n\n**Statistics:**\n- **Difficulty:** Easy\n- **Accuracy:** 28.13%\n- **Total Submissions:** 6,93,316",
+    "source": "gfg"
+  },
+  {
+    "title": "Largest in Array",
+    "topic": "Arrays",
+    "difficulty": "Easy",
+    "description": "### GeeksforGeeks Problem\n\nThis question is imported from GeeksforGeeks. You can read the full problem statement and submit your solution directly on GFG:\n\n👉 [Solve \"Largest in Array\" on GeeksforGeeks](https://www.geeksforgeeks.org/problems/largest-element-in-array4009/1)\n\n**Statistics:**\n- **Difficulty:** Basic\n- **Accuracy:** 67.48%\n- **Total Submissions:** 6,16,519",
+    "source": "gfg"
+  },
+  {
+    "title": "Two Sum - Pair with Given Sum",
+    "topic": "Arrays",
+    "difficulty": "Easy",
+    "description": "### GeeksforGeeks Problem\n\nThis question is imported from GeeksforGeeks. You can read the full problem statement and submit your solution directly on GFG:\n\n👉 [Solve \"Two Sum - Pair with Given Sum\" on GeeksforGeeks](https://www.geeksforgeeks.org/problems/key-pair5616/1)\n\n**Statistics:**\n- **Difficulty:** Easy\n- **Accuracy:** 30.61%\n- **Total Submissions:** 5,53,568",
+    "source": "gfg"
+  },
+  {
+    "title": "Union of 2 Sorted Arrays",
+    "topic": "Arrays",
+    "difficulty": "Medium",
+    "description": "### GeeksforGeeks Problem\n\nThis question is imported from GeeksforGeeks. You can read the full problem statement and submit your solution directly on GFG:\n\n👉 [Solve \"Union of 2 Sorted Arrays\" on GeeksforGeeks](https://www.geeksforgeeks.org/problems/union-of-two-sorted-arrays-1587115621/1)\n\n**Statistics:**\n- **Difficulty:** Medium\n- **Accuracy:** 31.39%\n- **Total Submissions:** 5,42,007",
+    "source": "gfg"
+  },
+  {
+    "title": "Min and Max in Array",
+    "topic": "Arrays",
+    "difficulty": "Easy",
+    "description": "### GeeksforGeeks Problem\n\nThis question is imported from GeeksforGeeks. You can read the full problem statement and submit your solution directly on GFG:\n\n👉 [Solve \"Min and Max in Array\" on GeeksforGeeks](https://www.geeksforgeeks.org/problems/find-minimum-and-maximum-element-in-an-array4428/1)\n\n**Statistics:**\n- **Difficulty:** Basic\n- **Accuracy:** 68.55%\n- **Total Submissions:** 5,30,616",
+    "source": "gfg"
   }
 ]

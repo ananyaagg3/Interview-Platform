@@ -11,6 +11,14 @@ const roomSchema = new mongoose.Schema({
     title: { type: String },
     description: { type: String }
   },
+  selectedQuestions: [{
+    problemSource: { type: String, required: true, enum: ['bank', 'custom'] },
+    problemId: { type: mongoose.Schema.Types.ObjectId, ref: 'Problem', default: null },
+    customProblem: {
+      title: { type: String },
+      description: { type: String }
+    }
+  }],
   duration: { type: Number, required: true },
   defaultLanguage: { type: String, required: true },
   status: { type: String, required: true, enum: ['waiting', 'active', 'ended'], default: 'waiting' },

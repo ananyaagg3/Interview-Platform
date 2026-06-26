@@ -108,22 +108,53 @@ export default function setupSocket(io) {
     // Change active question event
     socket.on('change-question', async ({ roomId, problemSource, problemId, customProblem }) => {
       try {
-        const updateData = { problemSource };
-        if (problemSource === 'bank') {
-          updateData.problemId = problemId;
-          updateData.customProblem = null;
-        } else {
-          updateData.problemId = null;
-          updateData.customProblem = customProblem;
-        }
+        const room = await Room.findOne({ roomId });
+        if (room) {
+          room.problemSource = problemSource;
+          if (problemSource === 'bank') {
+            room.problemId = problemId;
+            room.customProblem = undefined;
+          } else {
+            room.problemId = undefined;
+            room.customProblem = customProblem;
+          }
 
-        await Room.updateOne({ roomId }, updateData);
-        const updatedRoom = await Room.findOne({ roomId }).populate('problemId');
-        io.to(roomId).emit('question-changed', {
-          problemSource: updatedRoom.problemSource,
-          problemId: updatedRoom.problemId,
-          customProblem: updatedRoom.customProblem
-        });
+          // Initialize selectedQuestions if it's undefined
+          if (!room.selectedQuestions) {
+            room.selectedQuestions = [];
+          }
+
+          // Check if this question is already in selectedQuestions
+          const alreadyExists = room.selectedQuestions.some(q => {
+            if (q.problemSource !== problemSource) return false;
+            if (problemSource === 'bank') {
+              return q.problemId?.toString() === problemId?.toString();
+            } else {
+              return q.customProblem?.title === customProblem?.title;
+            }
+          });
+
+          if (!alreadyExists) {
+            room.selectedQuestions.push({
+              problemSource,
+              problemId: problemSource === 'bank' ? problemId : null,
+              customProblem: problemSource === 'custom' ? customProblem : null
+            });
+          }
+
+          await room.save();
+
+          const updatedRoom = await Room.findOne({ roomId })
+            .populate('problemId')
+            .populate('selectedQuestions.problemId');
+
+          io.to(roomId).emit('question-changed', {
+            problemSource: updatedRoom.problemSource,
+            problemId: updatedRoom.problemId,
+            customProblem: updatedRoom.customProblem,
+            selectedQuestions: updatedRoom.selectedQuestions
+          });
+        }
       } catch (err) {
         console.error("Socket change-question error:", err);
       }

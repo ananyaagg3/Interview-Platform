@@ -18,11 +18,15 @@ const server = http.createServer(app);
 // Allow any localhost Vite port (5173-5180) in dev, or FRONTEND_URL in production
 const allowedOrigin = (origin, callback) => {
   if (!origin) return callback(null, true); // allow non-browser requests (curl, etc.)
-  if (process.env.FRONTEND_URL && origin === process.env.FRONTEND_URL) {
+  
+  const normalizedOrigin = origin.replace(/\/$/, '');
+  const targetFrontend = process.env.FRONTEND_URL ? process.env.FRONTEND_URL.replace(/\/$/, '') : null;
+
+  if (targetFrontend && normalizedOrigin === targetFrontend) {
     return callback(null, true);
   }
   // Allow any localhost port in the Vite range
-  if (/^http:\/\/localhost:(517[3-9]|518[0-9])$/.test(origin)) {
+  if (/^http:\/\/localhost:(517[3-9]|518[0-9])$/.test(normalizedOrigin)) {
     return callback(null, true);
   }
   callback(new Error(`CORS: origin ${origin} not allowed`));

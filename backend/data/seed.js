@@ -1,3 +1,6 @@
+import dns from "node:dns";
+
+dns.setServers(["8.8.8.8", "1.1.1.1"]);
 import mongoose from 'mongoose';
 import Problem from '../models/Problem.js';
 import dotenv from 'dotenv';
@@ -12,10 +15,15 @@ async function seed() {
     await mongoose.connect(MONGODB_URI);
     console.log('Connected to MongoDB');
 
-    const count = await Problem.countDocuments();
-    if (count > 0) {
-      console.log('Problems already seeded. Skipping.');
-      process.exit(0);
+    if (process.argv.includes('--force')) {
+      await Problem.deleteMany({});
+      console.log('Cleared existing problems.');
+    } else {
+      const count = await Problem.countDocuments();
+      if (count > 0) {
+        console.log('Problems already seeded. Skipping. Use --force to reseed.');
+        process.exit(0);
+      }
     }
 
     const data = JSON.parse(fs.readFileSync(new URL('./problems.json', import.meta.url)));

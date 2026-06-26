@@ -42,6 +42,21 @@ export default function Room() {
   
   // Interviewer Notes
   const [notes, setNotes] = useState('');
+  const [viewedQuestionIndex, setViewedQuestionIndex] = useState(0);
+
+  // Auto-sync viewedQuestionIndex when the room active question changes
+  useEffect(() => {
+    if (!room || !room.selectedQuestions) return;
+    const activeIdx = room.selectedQuestions.findIndex(q => {
+      return (q.problemSource === 'bank' && room.problemSource === 'bank' && 
+              (q.problemId?._id?.toString() === room.problemId?._id?.toString() || q.problemId?.toString() === room.problemId?.toString() || q.problemId?._id === room.problemId)) ||
+             (q.problemSource === 'custom' && room.problemSource === 'custom' &&
+              q.customProblem?.title === room.customProblem?.title);
+    });
+    if (activeIdx !== -1) {
+      setViewedQuestionIndex(activeIdx);
+    }
+  }, [room?.problemId, room?.customProblem, room?.selectedQuestions]);
 
   // Change Question Modal States
   const [showChangeQuestionModal, setShowChangeQuestionModal] = useState(false);
@@ -261,12 +276,13 @@ export default function Room() {
       setStatus(newStatus);
     };
 
-    const onQuestionChanged = ({ problemSource, problemId, customProblem }) => {
+    const onQuestionChanged = ({ problemSource, problemId, customProblem, selectedQuestions }) => {
       setRoom(prev => ({
         ...prev,
         problemSource,
         problemId,
-        customProblem
+        customProblem,
+        selectedQuestions: selectedQuestions || prev.selectedQuestions
       }));
     };
 
@@ -568,6 +584,32 @@ export default function Room() {
     }
   };
 
+  const getViewedQuestion = () => {
+    if (!room) return null;
+    if (room.selectedQuestions && room.selectedQuestions.length > 0 && viewedQuestionIndex >= 0 && viewedQuestionIndex < room.selectedQuestions.length) {
+      const q = room.selectedQuestions[viewedQuestionIndex];
+      return q.problemSource === 'bank' ? q.problemId : q.customProblem;
+    }
+    return room.problemSource === 'bank' ? room.problemId : room.customProblem;
+  };
+
+  const viewedQ = getViewedQuestion();
+  const isViewedQBank = room?.selectedQuestions && room.selectedQuestions.length > 0 && viewedQuestionIndex >= 0 && viewedQuestionIndex < room.selectedQuestions.length
+    ? room.selectedQuestions[viewedQuestionIndex].problemSource === 'bank'
+    : room?.problemSource === 'bank';
+
+  const handleTabClick = (idx, q) => {
+    setViewedQuestionIndex(idx);
+    if (role === 'Interviewer') {
+      socket.emit('change-question', {
+        roomId,
+        problemSource: q.problemSource,
+        problemId: q.problemSource === 'bank' ? (q.problemId?._id || q.problemId) : undefined,
+        customProblem: q.problemSource === 'custom' ? q.customProblem : undefined
+      });
+    }
+  };
+
   return (
     <div className="h-screen flex flex-col bg-white select-none font-sans">
       {/* Disconnection banner */}
@@ -624,20 +666,76 @@ export default function Room() {
         {/* Column 1: Left Panel (30%) */}
         <div className="w-[30%] border-r border-gray-200 bg-gray-50 flex flex-col overflow-hidden">
           {/* Problem description wrapper (scrollable) */}
-          <div className="flex-1 overflow-y-auto p-6">
+          <div className="flex-1 overflow-y-auto p-6 flex flex-col">
+            {/* Tabs for Selected Questions */}
+            {room.selectedQuestions && room.selectedQuestions.length > 1 && (
+              <div className="flex border-b border-gray-200 mb-4 overflow-x-auto scrollbar-none shrink-0 gap-1 pr-1">
+                {room.selectedQuestions.map((q, idx) => {
+                  const isRoomActive = (q.problemSource === 'bank' && room.problemSource === 'bank' && 
+                                        (q.problemId?._id?.toString() === room.problemId?._id?.toString() || q.problemId?.toString() === room.problemId?.toString() || q.problemId?._id === room.problemId)) ||
+                                       (q.problemSource === 'custom' && room.problemSource === 'custom' &&
+                                        q.customProblem?.title === room.customProblem?.title);
+                  
+                  const qDetails = q.problemSource === 'bank' 
+                    ? { title: q.problemId?.title || 'Loading...', topic: q.problemId?.topic || '' }
+                    : { title: q.customProblem?.title || 'Custom Problem', topic: 'Custom' };
+
+                  const isViewed = viewedQuestionIndex === idx;
+
+                  return (
+                    <button
+                      key={idx}
+                      onClick={() => handleTabClick(idx, q)}
+                      className={`px-3 py-2 text-xs font-semibold rounded-t-xl transition-all cursor-pointer border-t border-x -mb-[1px] whitespace-nowrap flex items-center gap-1.5 ${
+                        isViewed 
+                          ? 'bg-white border-gray-200 text-orange-600 font-bold border-b-white' 
+                          : 'bg-gray-100/50 border-transparent text-gray-500 hover:text-gray-700 hover:bg-gray-100 border-b-gray-200'
+                      }`}
+                    >
+                      <span>Q{idx + 1}: {qDetails.title.length > 12 ? qDetails.title.substring(0, 12) + '...' : qDetails.title}</span>
+                      {isRoomActive && (
+                        <span className="w-1.5 h-1.5 rounded-full bg-green-500 ring-2 ring-green-100 animate-pulse" title="Active Question" />
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
+            )}
+
             <h2 className="text-lg font-bold text-gray-950 mb-2">
-              {room.problemSource === 'bank' ? room.problemId?.title : room.customProblem?.title}
+              {viewedQ?.title || 'No Question Selected'}
             </h2>
-            {room.problemSource === 'bank' && room.problemId && (
-              <div className="flex gap-1.5 mb-4">
-                <span className="text-[10px] bg-gray-200 text-gray-700 px-2 py-0.5 rounded font-bold uppercase tracking-wider">{room.problemId.topic}</span>
-                <span className={`text-[10px] px-2 py-0.5 rounded font-bold uppercase tracking-wider ${room.problemId.difficulty==='Easy'?'bg-green-100 text-green-700':room.problemId.difficulty==='Medium'?'bg-yellow-100 text-yellow-700':'bg-red-100 text-red-700'}`}>
-                  {room.problemId.difficulty}
+            {isViewedQBank && viewedQ && (
+              <div className="flex gap-1.5 mb-4 shrink-0">
+                <span className="text-[10px] bg-gray-200 text-gray-700 px-2 py-0.5 rounded font-bold uppercase tracking-wider">{viewedQ.topic}</span>
+                <span className={`text-[10px] px-2 py-0.5 rounded font-bold uppercase tracking-wider ${viewedQ.difficulty==='Easy'?'bg-green-100 text-green-700':viewedQ.difficulty==='Medium'?'bg-yellow-100 text-yellow-700':'bg-red-100 text-red-700'}`}>
+                  {viewedQ.difficulty}
                 </span>
               </div>
             )}
-            <div className="text-gray-800 text-sm leading-relaxed whitespace-pre-wrap">
-              {room.problemSource === 'bank' ? room.problemId?.description : room.customProblem?.description}
+            <div className="text-gray-800 text-sm leading-relaxed whitespace-pre-wrap flex-1">
+              {(() => {
+                const text = viewedQ?.description;
+                if (!text) return null;
+                const urlRegex = /(https?:\/\/[^\s\)]+)/g;
+                const parts = text.split(urlRegex);
+                return parts.map((part, i) => {
+                  if (part.match(/^https?:\/\//)) {
+                    return (
+                      <a 
+                        key={i} 
+                        href={part} 
+                        target="_blank" 
+                        rel="noopener noreferrer" 
+                        className="text-orange-600 hover:text-orange-700 hover:underline font-semibold"
+                      >
+                        {part}
+                      </a>
+                    );
+                  }
+                  return part;
+                });
+              })()}
             </div>
             {role === 'Interviewer' && (
               <button
