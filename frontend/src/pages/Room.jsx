@@ -241,7 +241,7 @@ export default function Room() {
     if (localVideoRef.current && localStream) {
       localVideoRef.current.srcObject = localStream;
     }
-  }, [localStream, hasJoined]);
+  }, [localStream, hasJoined, isCameraOff]);
 
   useEffect(() => {
     if (remoteVideoRef.current && remoteStream) {
