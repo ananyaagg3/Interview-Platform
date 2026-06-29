@@ -78,8 +78,6 @@ export default function Room() {
   
   // WebRTC Refs
   const peerRef = useRef(null);
-  const localVideoRef = useRef(null);
-  const remoteVideoRef = useRef(null);
   const whiteboardCanvasRef = useRef(null);
 
   // Fetch room data once on mount
@@ -236,20 +234,21 @@ export default function Room() {
     };
   }, [hasJoined]);
 
-  // Handle local video playback on video element refs
-  useEffect(() => {
-    if (localVideoRef.current && localStream) {
-      localVideoRef.current.srcObject = localStream;
-      localVideoRef.current.play().catch(err => {
+  // Handle local video playback on video element refs via callback refs
+  const localVideoRef = useCallback((node) => {
+    if (node && localStream) {
+      node.srcObject = localStream;
+      node.play().catch(err => {
         console.error("Local video playback failed:", err);
       });
     }
-  }, [localStream, hasJoined, isCameraOff]);
+  }, [localStream, isCameraOff]);
 
-  useEffect(() => {
-    if (remoteVideoRef.current && remoteStream) {
-      remoteVideoRef.current.srcObject = remoteStream;
-      remoteVideoRef.current.play().catch(err => {
+  // Handle remote video playback on video element refs via callback refs
+  const remoteVideoRef = useCallback((node) => {
+    if (node && remoteStream) {
+      node.srcObject = remoteStream;
+      node.play().catch(err => {
         console.error("Remote video playback failed:", err);
       });
     }
