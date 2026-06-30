@@ -6,6 +6,7 @@ import { apiFetch } from '../utils/api';
 import Editor from '@monaco-editor/react';
 import Peer from 'simple-peer';
 import Whiteboard from '../components/Whiteboard';
+import Markdown from '../components/Markdown';
 import { Video, VideoOff, Mic, MicOff, AlertCircle, Play, Sparkles, X } from 'lucide-react';
 
 export default function Room() {
@@ -32,6 +33,7 @@ export default function Room() {
   const [permissionError, setPermissionError] = useState('');
   const [micVolume, setMicVolume] = useState(0);
   const [iceServers, setIceServers] = useState([{ urls: "stun:stun.l.google.com:19302" }]);
+  const [turnLoaded, setTurnLoaded] = useState(false);
   const [videoStatus, setVideoStatus] = useState('waiting'); // 'waiting' | 'connected' | 'reconnecting'
   const [remoteUserName, setRemoteUserName] = useState('');
   const [activeTab, setActiveTab] = useState('code'); // 'code' | 'whiteboard'
@@ -114,6 +116,8 @@ export default function Room() {
         }
       } catch (err) {
         console.error("Error fetching TURN credentials, using STUN fallback:", err);
+      } finally {
+        setTurnLoaded(true);
       }
     };
     if (hasJoined) {
@@ -266,7 +270,7 @@ export default function Room() {
 
   // Main Socket room joining and event handling after Pre-session join clicked
   useEffect(() => {
-    if (!room || !hasJoined) return;
+    if (!room || !hasJoined || !turnLoaded) return;
 
     if (!socket.connected) {
       socket.connect();
@@ -399,7 +403,7 @@ export default function Room() {
       socket.disconnect();
     };
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [roomId, hasJoined, initiatePeer, user.id, user.name]);
+  }, [roomId, hasJoined, turnLoaded, initiatePeer, user.id, user.name]);
 
   // Clean up media tracks on unmount
   useEffect(() => {
@@ -755,29 +759,8 @@ export default function Room() {
                 </span>
               </div>
             )}
-            <div className="text-gray-800 text-sm leading-relaxed whitespace-pre-wrap flex-1">
-              {(() => {
-                const text = viewedQ?.description;
-                if (!text) return null;
-                const urlRegex = /(https?:\/\/[^\s\)]+)/g;
-                const parts = text.split(urlRegex);
-                return parts.map((part, i) => {
-                  if (part.match(/^https?:\/\//)) {
-                    return (
-                      <a 
-                        key={i} 
-                        href={part} 
-                        target="_blank" 
-                        rel="noopener noreferrer" 
-                        className="text-orange-600 hover:text-orange-700 hover:underline font-semibold"
-                      >
-                        {part}
-                      </a>
-                    );
-                  }
-                  return part;
-                });
-              })()}
+            <div className="text-gray-800 text-sm leading-relaxed flex-1">
+              <Markdown content={viewedQ?.description} />
             </div>
             {role === 'Interviewer' && (
               <button
