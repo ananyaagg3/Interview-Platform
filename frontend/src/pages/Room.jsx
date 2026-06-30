@@ -106,15 +106,9 @@ export default function Room() {
     const fetchTurn = async () => {
       try {
         const turnData = await apiFetch('/rooms/turn-credentials');
-        if (turnData.url) {
-          setIceServers([
-            { urls: "stun:stun.l.google.com:19302" },
-            {
-              urls: turnData.url,
-              username: turnData.username,
-              credential: turnData.credential
-            }
-          ]);
+        // Backend now returns { iceServers: [...] } array format
+        if (turnData.iceServers && turnData.iceServers.length > 0) {
+          setIceServers(turnData.iceServers);
         }
       } catch (err) {
         console.error("Error fetching TURN credentials, using STUN fallback:", err);

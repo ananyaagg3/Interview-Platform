@@ -137,10 +137,46 @@ export const getRoomReport = async (req, res) => {
 
 export const getTurnCredentials = async (req, res) => {
   try {
+    const meteredApiKey = process.env.METERED_API_KEY;
+    const meteredDomain = process.env.METERED_DOMAIN; // e.g. "your-app.metered.live"
+
+    // If Metered credentials are configured, fetch dynamic TURN servers
+    if (meteredApiKey && meteredDomain) {
+      try {
+        const response = await fetch(
+          `https://${meteredDomain}/api/v1/turn/credentials?apiKey=${meteredApiKey}`
+        );
+        if (response.ok) {
+          const iceServers = await response.json();
+          return res.status(200).json({ iceServers });
+        }
+      } catch (fetchErr) {
+        console.error('Failed to fetch Metered TURN credentials:', fetchErr);
+        // Fall through to static env var fallback
+      }
+    }
+
+    // Fallback: use static TURN_URL/USERNAME/CREDENTIAL env vars if set
+    const turnUrl = process.env.TURN_URL;
+    if (turnUrl && turnUrl.startsWith('turn')) {
+      return res.status(200).json({
+        iceServers: [
+          { urls: 'stun:stun.l.google.com:19302' },
+          {
+            urls: turnUrl,
+            username: process.env.TURN_USERNAME || '',
+            credential: process.env.TURN_CREDENTIAL || ''
+          }
+        ]
+      });
+    }
+
+    // No TURN configured — return STUN only
     res.status(200).json({
-      url: process.env.TURN_URL || "",
-      username: process.env.TURN_USERNAME || "",
-      credential: process.env.TURN_CREDENTIAL || ""
+      iceServers: [
+        { urls: 'stun:stun.l.google.com:19302' },
+        { urls: 'stun:stun1.l.google.com:19302' }
+      ]
     });
   } catch (err) {
     console.error(err);
