@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef, useCallback } from 'react';
+import { useEffect, useState, useRef, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { socket } from '../utils/socket';
@@ -56,8 +56,10 @@ export default function Room() {
               q.customProblem?.title === room.customProblem?.title);
     });
     if (activeIdx !== -1) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setViewedQuestionIndex(activeIdx);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [room?.problemId, room?.customProblem, room?.selectedQuestions]);
 
   // Change Question Modal States
@@ -92,7 +94,7 @@ export default function Room() {
         const data = await apiFetch(`/rooms/${roomId}`);
         setRoom(data.room);
         setLanguage(data.room.currentLanguage || data.room.defaultLanguage);
-      } catch (err) {
+      } catch {
         setError('Room not found');
       }
     };
@@ -183,7 +185,6 @@ export default function Room() {
   useEffect(() => {
     if (hasJoined) return;
 
-    let streamRef = null;
     let audioContext = null;
     let analyser = null;
     let animationFrameId = null;
@@ -191,7 +192,6 @@ export default function Room() {
     const getMedia = async () => {
       try {
         const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
-        streamRef = stream;
         setLocalStream(stream);
         setPermissionGranted(true);
         setPermissionError('');
@@ -246,6 +246,7 @@ export default function Room() {
         console.error("Local video playback failed:", err);
       });
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [localStream, isCameraOff]);
 
   // Handle remote video playback on video element refs via callback refs
@@ -324,7 +325,7 @@ export default function Room() {
       navigate(`/report/${roomId}`);
     };
 
-    const onPeerJoined = ({ userId: peerId, userName: peerName }) => {
+    const onPeerJoined = ({ userName: peerName }) => {
       console.log(`Peer joined: ${peerName}`);
       setRemoteUserName(peerName);
       // Wait a moment for connection parameters to align, then initiate

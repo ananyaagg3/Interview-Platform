@@ -53,6 +53,20 @@ export const getRoom = async (req, res) => {
     if (!room) {
       return res.status(404).json({ error: 'Room not found' });
     }
+
+    const problemsToProcess = [];
+    if (room.problemId) problemsToProcess.push(room.problemId);
+    if (room.selectedQuestions) {
+      for (const sq of room.selectedQuestions) {
+        if (sq.problemSource === 'bank' && sq.problemId) {
+          problemsToProcess.push(sq.problemId);
+        }
+      }
+    }
+    if (problemsToProcess.length > 0) {
+      await ensureProblemDescriptions(problemsToProcess);
+    }
+
     res.status(200).json({ room });
   } catch (err) {
     console.error(err);
@@ -285,6 +299,77 @@ ${notes}`;
       }
     } catch (saveErr) {
       console.error("Failed to save error report:", saveErr);
+    }
+  }
+};
+
+export const ensureProblemDescriptions = async (problems) => {
+  if (!problems) return;
+  const problemsArray = Array.isArray(problems) ? problems : [problems];
+
+  for (const p of problemsArray) {
+    if (!p) continue;
+    // Check if the description contains the placeholder text
+    if (p.description && p.description.includes('imported from GeeksforGeeks')) {
+      try {
+        console.log(`[GFG Import] Generating description for: "${p.title}"`);
+        const apiKey = process.env.GEMINI_API_KEY;
+        if (!apiKey) {
+          console.warn("GEMINI_API_KEY not found in env, skipping description generation.");
+          continue;
+        }
+
+        const prompt = `You are a computer science instructor and technical interviewer.
+Generate a clean, professional, and detailed coding problem description in markdown format for the standard coding interview problem: "${p.title}".
+This is a GeeksforGeeks problem of difficulty "${p.difficulty}" and topic "${p.topic}".
+
+Your response should contain:
+- A clear, concise problem statement explaining what needs to be solved.
+- At least two Examples with Input, Output, and Explanation.
+- Expected Time and Space Complexity.
+- Constraints.
+
+Ensure the markdown is clean. Do not wrap the response in \`\`\`markdown or \`\`\`, just output the raw markdown text directly.`;
+
+        const apiResponse = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent`, {
+          method: 'POST',
+          headers: { 
+            'Content-Type': 'application/json',
+            'x-goog-api-key': apiKey
+          },
+          body: JSON.stringify({
+            contents: [{ parts: [{ text: prompt }] }]
+          })
+        });
+
+        if (apiResponse.ok) {
+          const data = await apiResponse.json();
+          let description = data.candidates?.[0]?.content?.parts?.[0]?.text || "";
+          description = description.trim();
+
+          // Clean up ```markdown wrappers if the model still generated them
+          if (description.startsWith("```markdown")) {
+            description = description.slice(11);
+          } else if (description.startsWith("```")) {
+            description = description.slice(3);
+          }
+          if (description.endsWith("```")) {
+            description = description.slice(0, -3);
+          }
+          description = description.trim();
+
+          if (description) {
+            // Update in MongoDB
+            p.description = description;
+            await p.save();
+            console.log(`[GFG Import] Successfully generated and saved description for: "${p.title}"`);
+          }
+        } else {
+          console.error(`[GFG Import] Gemini API error: Status ${apiResponse.status}`);
+        }
+      } catch (err) {
+        console.error(`[GFG Import] Error generating description for "${p.title}":`, err);
+      }
     }
   }
 };

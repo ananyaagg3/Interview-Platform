@@ -148,6 +148,20 @@ export default function setupSocket(io) {
             .populate('problemId')
             .populate('selectedQuestions.problemId');
 
+          const problemsToProcess = [];
+          if (updatedRoom.problemId) problemsToProcess.push(updatedRoom.problemId);
+          if (updatedRoom.selectedQuestions) {
+            for (const sq of updatedRoom.selectedQuestions) {
+              if (sq.problemSource === 'bank' && sq.problemId) {
+                problemsToProcess.push(sq.problemId);
+              }
+            }
+          }
+          if (problemsToProcess.length > 0) {
+            const { ensureProblemDescriptions } = await import('../controllers/roomController.js');
+            await ensureProblemDescriptions(problemsToProcess);
+          }
+
           io.to(roomId).emit('question-changed', {
             problemSource: updatedRoom.problemSource,
             problemId: updatedRoom.problemId,
