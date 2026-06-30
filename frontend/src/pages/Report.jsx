@@ -5,7 +5,7 @@ import { apiFetch } from '../utils/api';
 import { socket } from '../utils/socket';
 import Editor from '@monaco-editor/react';
 import { pdf, Document, Page, Text, View, StyleSheet } from '@react-pdf/renderer';
-import { FileText, ChevronDown, ChevronUp, Download, ArrowLeft, Award, CheckCircle, AlertTriangle, Sparkles } from 'lucide-react';
+import { FileText, ChevronDown, ChevronUp, Download, ArrowLeft, AlertTriangle, Sparkles } from 'lucide-react';
 
 // react-pdf Styles
 const pdfStyles = StyleSheet.create({

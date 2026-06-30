@@ -126,11 +126,6 @@ export default function Dashboard() {
     ? Math.round(hostedRooms.reduce((acc, curr) => acc + Number(curr.duration || 0), 0) / totalHosted)
     : 0;
 
-  useEffect(() => {
-    fetchProblems();
-    fetchPastSessions();
-  }, []);
-
   const fetchProblems = async () => {
     try {
       const data = await apiFetch('/rooms/problems');
@@ -148,6 +143,11 @@ export default function Dashboard() {
       console.error(err);
     }
   };
+
+  useEffect(() => {
+    fetchProblems();
+    fetchPastSessions();
+  }, []);
 
   const handleAddCustomQuestion = () => {
     if (!customTitle.trim() || !customDesc.trim()) {
