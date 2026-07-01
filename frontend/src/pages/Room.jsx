@@ -82,6 +82,9 @@ export default function Room() {
   
   // WebRTC Refs
   const peerRef = useRef(null);
+  const remoteSocketIdRef = useRef(null);
+  const pendingSignalsRef = useRef([]);
+  const reconnectTimerRef = useRef(null);
   const whiteboardCanvasRef = useRef(null);
 
   // Fetch room data once on mount
@@ -121,39 +124,89 @@ export default function Room() {
     }
   }, [hasJoined]);
 
+  const getSignalType = (signalData) => {
+    if (!signalData) return 'unknown';
+    return signalData.type || (signalData.candidate ? 'candidate' : 'unknown');
+  };
+
+  const destroyPeer = useCallback((reason = 'cleanup') => {
+    if (reconnectTimerRef.current) {
+      clearTimeout(reconnectTimerRef.current);
+      reconnectTimerRef.current = null;
+    }
+
+    const peer = peerRef.current;
+    if (peer) {
+      console.log(`[WebRTC] Destroying peer: ${reason}`);
+      peer.removeAllListeners();
+      peer.destroy();
+      peerRef.current = null;
+    }
+
+    pendingSignalsRef.current = [];
+    setRemoteStream(null);
+    setVideoStatus('waiting');
+  }, []);
+
   // WebRTC Peer connection helper
-  const initiatePeer = useCallback((initiator) => {
+  const initiatePeer = useCallback((initiator, targetSocketId = remoteSocketIdRef.current) => {
     const currentStream = localStreamRef.current;
     if (!currentStream) {
-      console.warn("initiatePeer called but localStreamRef.current is null");
+      console.warn('[WebRTC] initiatePeer called before local media was ready');
       return null;
     }
-    console.log(`Initiating WebRTC Peer. Initiator: ${initiator}`);
 
-    if (peerRef.current) {
-      peerRef.current.destroy();
+    if (!targetSocketId) {
+      console.warn('[WebRTC] initiatePeer called without a target socket id');
     }
+
+    if (peerRef.current && !peerRef.current.destroyed) {
+      destroyPeer('new negotiation starting');
+    }
+
+    remoteSocketIdRef.current = targetSocketId;
+    setVideoStatus('reconnecting');
+
+    console.log('[WebRTC] Creating peer', {
+      initiator,
+      targetSocketId,
+      iceServers: iceServersRef.current,
+      audioTracks: currentStream.getAudioTracks().length,
+      videoTracks: currentStream.getVideoTracks().length
+    });
 
     const peer = new Peer({
       initiator,
-      trickle: false,
+      trickle: true,
       config: { iceServers: iceServersRef.current },
       stream: currentStream
     });
 
     peer.on('signal', (data) => {
-      socket.emit('signal', { roomId, signalData: data });
+      console.log(`[WebRTC] Local signal generated: ${getSignalType(data)}`, { to: remoteSocketIdRef.current });
+      socket.emit('signal', { roomId, to: remoteSocketIdRef.current, signalData: data });
     });
 
     peer.on('stream', (stream) => {
-      console.log('Remote stream received');
+      console.log('[WebRTC] Remote stream received', {
+        audioTracks: stream.getAudioTracks().length,
+        videoTracks: stream.getVideoTracks().length
+      });
       setRemoteStream(stream);
       setVideoStatus('connected');
     });
 
+    peer.on('track', (track, stream) => {
+      console.log(`[WebRTC] Remote track received: ${track.kind}`, { streamId: stream?.id });
+    });
+
+    peer.on('connect', () => {
+      console.log('[WebRTC] Data channel connected');
+      setVideoStatus('connected');
+    });
+
     peer.on('close', () => {
-      console.log('Peer closed connection');
-      peer.destroy();
+      console.log('[WebRTC] Peer closed connection');
       if (peerRef.current === peer) {
         peerRef.current = null;
       }
@@ -162,8 +215,7 @@ export default function Room() {
     });
 
     peer.on('error', (err) => {
-      console.error('Peer connection error:', err);
-      peer.destroy();
+      console.error('[WebRTC] Peer connection error:', err);
       if (peerRef.current === peer) {
         peerRef.current = null;
       }
@@ -171,9 +223,27 @@ export default function Room() {
       setVideoStatus('reconnecting');
     });
 
+    const pc = peer._pc;
+    if (pc) {
+      pc.addEventListener('connectionstatechange', () => {
+        console.log(`[WebRTC] connectionState=${pc.connectionState}`);
+        if (pc.connectionState === 'connected') setVideoStatus('connected');
+        if (['failed', 'disconnected'].includes(pc.connectionState)) setVideoStatus('reconnecting');
+      });
+      pc.addEventListener('iceconnectionstatechange', () => {
+        console.log(`[WebRTC] iceConnectionState=${pc.iceConnectionState}`);
+      });
+      pc.addEventListener('signalingstatechange', () => {
+        console.log(`[WebRTC] signalingState=${pc.signalingState}`);
+      });
+      pc.addEventListener('icegatheringstatechange', () => {
+        console.log(`[WebRTC] iceGatheringState=${pc.iceGatheringState}`);
+      });
+    }
+
     peerRef.current = peer;
     return peer;
-  }, [roomId]);
+  }, [destroyPeer, roomId]);
 
   // Pre-session check stream acquisition and mic volume tracking
   useEffect(() => {
@@ -267,12 +337,13 @@ export default function Room() {
   useEffect(() => {
     if (!room || !hasJoined || !turnLoaded) return;
 
-    if (!socket.connected) {
-      socket.connect();
-    }
-    socket.emit('join-room', { roomId, userId: user.id, userName: user.name });
+    const joinRoom = () => {
+      console.log('[Socket] Joining room', { roomId, userId: user.id, userName: user.name });
+      socket.emit('join-room', { roomId, userId: user.id, userName: user.name });
+    };
 
     const onRoomState = (state) => {
+      console.log('[Socket] room-state received', state);
       if (state.currentCode) {
         isRemoteChange.current = true;
         setCode(state.currentCode);
@@ -313,45 +384,77 @@ export default function Room() {
       if (localStreamRef.current) {
         localStreamRef.current.getTracks().forEach(t => t.stop());
       }
-      if (peerRef.current) {
-        peerRef.current.destroy();
-      }
+      destroyPeer('session ended');
       navigate(`/report/${roomId}`);
     };
 
-    const onPeerJoined = ({ userName: peerName }) => {
-      console.log(`Peer joined: ${peerName}`);
-      setRemoteUserName(peerName);
-      // Wait a moment for connection parameters to align, then initiate
-      setTimeout(() => initiatePeer(true), 500);
+    const onExistingPeers = (peers = []) => {
+      console.log('[Socket] existing-peers received', peers);
+      const [peer] = peers;
+      if (!peer) return;
+      remoteSocketIdRef.current = peer.socketId;
+      setRemoteUserName(peer.userName || 'Peer');
     };
 
-    const onSignal = (signalData) => {
-      const peer = peerRef.current;
-      if (!peer) {
-        if (signalData.type === 'offer') {
-          const newPeer = initiatePeer(false);
-          if (newPeer) {
-            try {
-              newPeer.signal(signalData);
-            } catch (err) {
-              console.error('Error signaling new peer:', err);
-            }
-          }
+    const onPeerJoined = ({ socketId, userName: peerName }) => {
+      console.log('[Socket] peer-joined received', { socketId, peerName });
+      if (!socketId) return;
+      remoteSocketIdRef.current = socketId;
+      pendingSignalsRef.current = [];
+      setRemoteUserName(peerName || 'Peer');
+      setVideoStatus('reconnecting');
+
+      reconnectTimerRef.current = setTimeout(() => {
+        initiatePeer(true, socketId);
+      }, 150);
+    };
+
+    const onSignal = (payload) => {
+      const signalData = payload?.signalData || payload;
+      const from = payload?.from;
+      const signalType = getSignalType(signalData);
+
+      console.log('[WebRTC] Remote signal received', { from, signalType });
+
+      if (!signalData) return;
+      if (from) {
+        if (remoteSocketIdRef.current && remoteSocketIdRef.current !== from) {
+          console.warn('[WebRTC] Ignoring signal from non-active peer', { from, activePeer: remoteSocketIdRef.current });
+          return;
         }
-        return;
+        remoteSocketIdRef.current = from;
+        if (payload.userName) setRemoteUserName(payload.userName);
       }
 
-      const pc = peer._pc;
-      const signalingState = pc ? pc.signalingState : null;
+      let peer = peerRef.current;
+      if (!peer || peer.destroyed) {
+        if (signalData.type !== 'offer') {
+          console.log('[WebRTC] Queueing signal until offer creates the peer', { signalType });
+          pendingSignalsRef.current.push(signalData);
+          return;
+        }
+        peer = initiatePeer(false, from || remoteSocketIdRef.current);
+      }
 
-      if (peer.destroyed || peer.connected) return;
-      if (signalingState === 'stable') return;
+      if (!peer || peer.destroyed) return;
 
       try {
         peer.signal(signalData);
+        const queuedSignals = pendingSignalsRef.current.splice(0);
+        queuedSignals.forEach((queuedSignal) => {
+          console.log('[WebRTC] Applying queued signal', { signalType: getSignalType(queuedSignal) });
+          peer.signal(queuedSignal);
+        });
       } catch (err) {
-        console.error('Error signaling existing peer:', err);
+        console.error('[WebRTC] Error applying signal:', err);
+      }
+    };
+
+    const onPeerLeft = ({ socketId }) => {
+      console.log('[Socket] peer-left received', { socketId });
+      if (!socketId || socketId === remoteSocketIdRef.current) {
+        remoteSocketIdRef.current = null;
+        destroyPeer('remote peer left');
       }
     };
 
@@ -363,12 +466,15 @@ export default function Room() {
     };
 
     const onDisconnect = () => {
+      console.warn('[Socket] disconnected');
       setDisconnected(true);
+      destroyPeer('socket disconnected');
     };
 
-    const onReconnect = () => {
+    const onConnect = () => {
+      console.log('[Socket] connected');
       setDisconnected(false);
-      socket.emit('join-room', { roomId, userId: user.id, userName: user.name });
+      joinRoom();
     };
 
     socket.on('room-state', onRoomState);
@@ -377,11 +483,19 @@ export default function Room() {
     socket.on('status-update', onStatusUpdate);
     socket.on('question-changed', onQuestionChanged);
     socket.on('session-ended', onSessionEnded);
+    socket.on('existing-peers', onExistingPeers);
     socket.on('peer-joined', onPeerJoined);
     socket.on('signal', onSignal);
+    socket.on('peer-left', onPeerLeft);
     socket.on('error', onError);
     socket.on('disconnect', onDisconnect);
-    socket.on('connect', onReconnect);
+    socket.on('connect', onConnect);
+
+    if (socket.connected) {
+      joinRoom();
+    } else {
+      socket.connect();
+    }
 
     return () => {
       socket.off('room-state', onRoomState);
@@ -390,27 +504,28 @@ export default function Room() {
       socket.off('status-update', onStatusUpdate);
       socket.off('question-changed', onQuestionChanged);
       socket.off('session-ended', onSessionEnded);
+      socket.off('existing-peers', onExistingPeers);
       socket.off('peer-joined', onPeerJoined);
       socket.off('signal', onSignal);
+      socket.off('peer-left', onPeerLeft);
       socket.off('error', onError);
       socket.off('disconnect', onDisconnect);
-      socket.off('connect', onReconnect);
+      socket.off('connect', onConnect);
+      destroyPeer('room component cleanup');
       socket.disconnect();
     };
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [roomId, hasJoined, turnLoaded, initiatePeer, user.id, user.name]);
+  }, [roomId, hasJoined, turnLoaded, initiatePeer, destroyPeer, user.id, user.name]);
 
   // Clean up media tracks on unmount
   useEffect(() => {
     return () => {
-      if (localStream) {
-        localStream.getTracks().forEach(t => t.stop());
+      if (localStreamRef.current) {
+        localStreamRef.current.getTracks().forEach(t => t.stop());
       }
-      if (peerRef.current) {
-        peerRef.current.destroy();
-      }
+      destroyPeer('component unmounted');
     };
-  }, [localStream]);
+  }, [destroyPeer]);
 
   const handleEditorChange = useCallback((value) => {
     if (isRemoteChange.current) {

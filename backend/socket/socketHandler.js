@@ -22,6 +22,7 @@ export default function setupSocket(io) {
 
     socket.on('join-room', async ({ roomId, userId, userName }) => {
       try {
+        console.log(`[room:${roomId}] join-room from socket=${socket.id} user=${userId} name=${userName}`);
         const room = await Room.findOne({ roomId });
         if (!room) {
           socket.emit('error', 'Room not found');
@@ -42,6 +43,11 @@ export default function setupSocket(io) {
           socket.emit('error', 'Room is full');
           return;
         }
+
+        socket.data.roomId = roomId;
+        socket.data.userId = userId;
+        socket.data.userName = userName;
+        socket.data.role = role;
 
         if (room.interviewerId && room.candidateId && room.status === 'waiting') {
           room.status = 'active';
@@ -68,8 +74,29 @@ export default function setupSocket(io) {
 
         // If there is another client in the room, notify them to initiate WebRTC
         const clients = io.sockets.adapter.rooms.get(roomId);
-        if (clients && clients.size > 1) {
-          socket.to(roomId).emit('peer-joined', { userId, userName });
+        const otherSocketIds = clients ? [...clients].filter(id => id !== socket.id) : [];
+        if (otherSocketIds.length > 0) {
+          const peers = otherSocketIds
+            .map(socketId => {
+              const peerSocket = io.sockets.sockets.get(socketId);
+              if (!peerSocket) return null;
+              return {
+                socketId,
+                userId: peerSocket.data.userId,
+                userName: peerSocket.data.userName,
+                role: peerSocket.data.role
+              };
+            })
+            .filter(Boolean);
+
+          console.log(`[room:${roomId}] notifying ${otherSocketIds.length} existing peer(s) about socket=${socket.id}`);
+          socket.emit('existing-peers', peers);
+          socket.to(roomId).emit('peer-joined', {
+            socketId: socket.id,
+            userId,
+            userName,
+            role
+          });
         }
 
       } catch (err) {
@@ -101,8 +128,23 @@ export default function setupSocket(io) {
     });
 
     // WebRTC signaling
-    socket.on('signal', ({ roomId, signalData }) => {
-      socket.to(roomId).emit('signal', signalData);
+    socket.on('signal', ({ roomId, signalData, to }) => {
+      const signalType = signalData?.type || (signalData?.candidate ? 'candidate' : 'unknown');
+      console.log(`[room:${roomId}] signal ${signalType} from=${socket.id}${to ? ` to=${to}` : ' broadcast'}`);
+
+      const payload = {
+        from: socket.id,
+        userId: socket.data.userId,
+        userName: socket.data.userName,
+        signalData
+      };
+
+      if (to && io.sockets.sockets.has(to)) {
+        socket.to(to).emit('signal', payload);
+        return;
+      }
+
+      socket.to(roomId).emit('signal', payload);
     });
 
     // Change active question event
@@ -199,6 +241,13 @@ export default function setupSocket(io) {
 
     socket.on('disconnect', () => {
       console.log(`Socket disconnected: ${socket.id}`);
+      if (socket.data.roomId) {
+        socket.to(socket.data.roomId).emit('peer-left', {
+          socketId: socket.id,
+          userId: socket.data.userId,
+          userName: socket.data.userName
+        });
+      }
     });
   });
 }
