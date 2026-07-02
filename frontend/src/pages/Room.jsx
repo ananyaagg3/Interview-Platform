@@ -41,6 +41,7 @@ export default function Room() {
   // Local stream controls
   const [isMuted, setIsMuted] = useState(false);
   const [isCameraOff, setIsCameraOff] = useState(false);
+  const [isRemoteMuted, setIsRemoteMuted] = useState(false);
   
   // Interviewer Notes
   const [notes, setNotes] = useState('');
@@ -79,6 +80,7 @@ export default function Room() {
   const roomFetched = useRef(false);
   const localStreamRef = useRef(null); // Ref to avoid stale closures
   const iceServersRef = useRef([{ urls: "stun:stun.l.google.com:19302" }]);
+  const isMutedRef = useRef(false);
   
   // WebRTC Refs
   const peerRef = useRef(null);
@@ -86,6 +88,10 @@ export default function Room() {
   const pendingSignalsRef = useRef([]);
   const reconnectTimerRef = useRef(null);
   const whiteboardCanvasRef = useRef(null);
+
+  const syncLocalMicState = useCallback((muted) => {
+    socket.emit(muted ? 'mic-muted' : 'mic-unmuted', { roomId });
+  }, [roomId]);
 
   // Fetch room data once on mount
   useEffect(() => {
@@ -145,6 +151,7 @@ export default function Room() {
 
     pendingSignalsRef.current = [];
     setRemoteStream(null);
+    setIsRemoteMuted(false);
     setVideoStatus('waiting');
   }, []);
 
@@ -211,6 +218,7 @@ export default function Room() {
         peerRef.current = null;
       }
       setRemoteStream(null);
+      setIsRemoteMuted(false);
       setVideoStatus('reconnecting');
     });
 
@@ -333,6 +341,10 @@ export default function Room() {
     iceServersRef.current = iceServers;
   }, [iceServers]);
 
+  useEffect(() => {
+    isMutedRef.current = isMuted;
+  }, [isMuted]);
+
   // Main Socket room joining and event handling after Pre-session join clicked
   useEffect(() => {
     if (!room || !hasJoined || !turnLoaded) return;
@@ -394,14 +406,16 @@ export default function Room() {
       if (!peer) return;
       remoteSocketIdRef.current = peer.socketId;
       setRemoteUserName(peer.userName || 'Peer');
+      setIsRemoteMuted(Boolean(peer.micMuted));
     };
 
-    const onPeerJoined = ({ socketId, userName: peerName }) => {
-      console.log('[Socket] peer-joined received', { socketId, peerName });
+    const onPeerJoined = ({ socketId, userName: peerName, micMuted }) => {
+      console.log('[Socket] peer-joined received', { socketId, peerName, micMuted });
       if (!socketId) return;
       remoteSocketIdRef.current = socketId;
       pendingSignalsRef.current = [];
       setRemoteUserName(peerName || 'Peer');
+      setIsRemoteMuted(Boolean(micMuted));
       setVideoStatus('reconnecting');
 
       reconnectTimerRef.current = setTimeout(() => {
@@ -458,6 +472,18 @@ export default function Room() {
       }
     };
 
+    const onRemoteMuted = ({ socketId, userId }) => {
+      if (socketId && remoteSocketIdRef.current && socketId !== remoteSocketIdRef.current) return;
+      if (!socketId && !userId) return;
+      setIsRemoteMuted(true);
+    };
+
+    const onRemoteUnmuted = ({ socketId, userId }) => {
+      if (socketId && remoteSocketIdRef.current && socketId !== remoteSocketIdRef.current) return;
+      if (!socketId && !userId) return;
+      setIsRemoteMuted(false);
+    };
+
     const onError = (msg) => {
       setError(msg);
       if (msg === 'Room not found' || msg === 'Room is full') {
@@ -475,6 +501,7 @@ export default function Room() {
       console.log('[Socket] connected');
       setDisconnected(false);
       joinRoom();
+      syncLocalMicState(isMutedRef.current);
     };
 
     socket.on('room-state', onRoomState);
@@ -487,12 +514,15 @@ export default function Room() {
     socket.on('peer-joined', onPeerJoined);
     socket.on('signal', onSignal);
     socket.on('peer-left', onPeerLeft);
+    socket.on('mic-muted', onRemoteMuted);
+    socket.on('mic-unmuted', onRemoteUnmuted);
     socket.on('error', onError);
     socket.on('disconnect', onDisconnect);
     socket.on('connect', onConnect);
 
     if (socket.connected) {
       joinRoom();
+      syncLocalMicState(isMutedRef.current);
     } else {
       socket.connect();
     }
@@ -508,6 +538,8 @@ export default function Room() {
       socket.off('peer-joined', onPeerJoined);
       socket.off('signal', onSignal);
       socket.off('peer-left', onPeerLeft);
+      socket.off('mic-muted', onRemoteMuted);
+      socket.off('mic-unmuted', onRemoteUnmuted);
       socket.off('error', onError);
       socket.off('disconnect', onDisconnect);
       socket.off('connect', onConnect);
@@ -515,7 +547,7 @@ export default function Room() {
       socket.disconnect();
     };
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [roomId, hasJoined, turnLoaded, initiatePeer, destroyPeer, user.id, user.name]);
+  }, [roomId, hasJoined, turnLoaded, initiatePeer, destroyPeer, syncLocalMicState, user.id, user.name]);
 
   // Clean up media tracks on unmount
   useEffect(() => {
@@ -614,7 +646,9 @@ export default function Room() {
       const audioTrack = localStream.getAudioTracks()[0];
       if (audioTrack) {
         audioTrack.enabled = !audioTrack.enabled;
-        setIsMuted(!audioTrack.enabled);
+        const nextMuted = !audioTrack.enabled;
+        setIsMuted(nextMuted);
+        syncLocalMicState(nextMuted);
       }
     }
   };
@@ -994,6 +1028,14 @@ export default function Room() {
                         <span className="text-[10px] font-semibold">Waiting for peer...</span>
                       </div>
                     )}
+                  </div>
+                )}
+                {isRemoteMuted && (
+                  <div
+                    className="absolute top-2 right-2 z-20 flex h-8 w-8 items-center justify-center rounded-full bg-[#EF4444] text-white shadow-lg"
+                    title="Microphone muted"
+                  >
+                    <MicOff size={16} />
                   </div>
                 )}
                 {/* Username label overlay */}

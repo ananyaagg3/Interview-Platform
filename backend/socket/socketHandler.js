@@ -2,6 +2,7 @@ import Room from '../models/Room.js';
 
 const activeRooms = new Map();
 const whiteboardEvents = new Map();
+const roomMicStates = new Map();
 let ioInstance = null;
 
 export const getIo = () => ioInstance;
@@ -19,6 +20,19 @@ export default function setupSocket(io) {
 
   io.on('connection', (socket) => {
     console.log(`Socket connected: ${socket.id}`);
+
+    const setRoomMicState = (roomId, userId, muted) => {
+      if (!roomId || !userId) return;
+      if (!roomMicStates.has(roomId)) {
+        roomMicStates.set(roomId, new Map());
+      }
+      roomMicStates.get(roomId).set(userId, muted);
+    };
+
+    const getRoomMicState = (roomId, userId) => {
+      if (!roomId || !userId) return false;
+      return roomMicStates.get(roomId)?.get(userId) ?? false;
+    };
 
     socket.on('join-room', async ({ roomId, userId, userName }) => {
       try {
@@ -48,6 +62,7 @@ export default function setupSocket(io) {
         socket.data.userId = userId;
         socket.data.userName = userName;
         socket.data.role = role;
+        socket.data.isMicMuted = getRoomMicState(roomId, userId);
 
         if (room.interviewerId && room.candidateId && room.status === 'waiting') {
           room.status = 'active';
@@ -84,7 +99,8 @@ export default function setupSocket(io) {
                 socketId,
                 userId: peerSocket.data.userId,
                 userName: peerSocket.data.userName,
-                role: peerSocket.data.role
+                role: peerSocket.data.role,
+                micMuted: getRoomMicState(roomId, peerSocket.data.userId)
               };
             })
             .filter(Boolean);
@@ -95,7 +111,8 @@ export default function setupSocket(io) {
             socketId: socket.id,
             userId,
             userName,
-            role
+            role,
+            micMuted: getRoomMicState(roomId, userId)
           });
         }
 
@@ -145,6 +162,28 @@ export default function setupSocket(io) {
       }
 
       socket.to(roomId).emit('signal', payload);
+    });
+
+    socket.on('mic-muted', ({ roomId }) => {
+      if (!roomId || socket.data.roomId !== roomId) return;
+      setRoomMicState(roomId, socket.data.userId, true);
+      socket.data.isMicMuted = true;
+      socket.to(roomId).emit('mic-muted', {
+        socketId: socket.id,
+        userId: socket.data.userId,
+        userName: socket.data.userName
+      });
+    });
+
+    socket.on('mic-unmuted', ({ roomId }) => {
+      if (!roomId || socket.data.roomId !== roomId) return;
+      setRoomMicState(roomId, socket.data.userId, false);
+      socket.data.isMicMuted = false;
+      socket.to(roomId).emit('mic-unmuted', {
+        socketId: socket.id,
+        userId: socket.data.userId,
+        userName: socket.data.userName
+      });
     });
 
     // Change active question event
