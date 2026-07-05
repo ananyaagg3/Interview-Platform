@@ -180,3 +180,16 @@ export const updateProfile = async (req, res) => {
   }
 };
 
+// GET /api/auth/me  — validate token & return current user (used on page load to restore session)
+export const getMe = async (req, res) => {
+  try {
+    const user = await User.findById(req.user.id).select('-passwordHash -resetCode -resetCodeExpires');
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+    res.status(200).json({ user: { id: user._id, name: user.name, email: user.email } });
+  } catch (err) {
+    console.error('GetMe error:', err);
+    res.status(500).json({ error: 'Server error' });
+  }
+};

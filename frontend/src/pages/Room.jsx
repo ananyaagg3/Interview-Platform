@@ -9,23 +9,37 @@ import Whiteboard from '../components/Whiteboard';
 import Markdown from '../components/Markdown';
 import { Video, VideoOff, Mic, MicOff, AlertCircle, Play, Sparkles, X } from 'lucide-react';
 
+// ─── localStorage helpers for room state persistence ───────────────────────
+const ROOM_STATE_KEY = (id) => `room_state_${id}`;
+
 export default function Room() {
   const { roomId } = useParams();
   const { user } = useAuth();
   const navigate = useNavigate();
 
+  // Restore persisted state from localStorage on first render
+  const getPersistedRoomState = () => {
+    try {
+      const raw = localStorage.getItem(ROOM_STATE_KEY(roomId));
+      if (raw) return JSON.parse(raw);
+    } catch { /* ignore */ }
+    return null;
+  };
+  const persisted = getPersistedRoomState();
+
   const [room, setRoom] = useState(null);
   const [role, setRole] = useState('');
   const [status, setStatus] = useState('waiting');
-  const [code, setCode] = useState('');
-  const [language, setLanguage] = useState('javascript');
+  const [code, setCode] = useState(persisted?.code || '');
+  const [language, setLanguage] = useState(persisted?.language || 'javascript');
   const [elapsed, setElapsed] = useState(0);
   const [error, setError] = useState('');
   const [disconnected, setDisconnected] = useState(false);
   const [showEndConfirm, setShowEndConfirm] = useState(false);
   const [showLeaveConfirm, setShowLeaveConfirm] = useState(false);
 
-  const [hasJoined, setHasJoined] = useState(false);
+  // If we have persisted state (user already joined this room), skip the preview screen
+  const [hasJoined, setHasJoined] = useState(Boolean(persisted?.hasJoined));
   const [localStream, setLocalStream] = useState(null);
   const [remoteStream, setRemoteStream] = useState(null);
   const [permissionGranted, setPermissionGranted] = useState(false);
@@ -41,7 +55,7 @@ export default function Room() {
   const [isCameraOff, setIsCameraOff] = useState(false);
   const [isRemoteMuted, setIsRemoteMuted] = useState(false);
 
-  const [notes, setNotes] = useState('');
+  const [notes, setNotes] = useState(persisted?.notes || '');
   const [viewedQuestionIndex, setViewedQuestionIndex] = useState(0);
 
   useEffect(() => {
@@ -361,9 +375,11 @@ export default function Room() {
       if (state.currentCode) {
         isRemoteChange.current = true;
         setCode(state.currentCode);
+        persistRoomState({ code: state.currentCode });
       }
       if (state.currentLanguage) {
         setLanguage(state.currentLanguage);
+        persistRoomState({ language: state.currentLanguage });
       }
       setStatus(state.status);
       setRole(state.role);
@@ -376,6 +392,8 @@ export default function Room() {
       isRemoteChange.current = true;
       setCode(newCode);
       setLanguage(newLang);
+      // Persist server code changes so refresh shows the latest code
+      persistRoomState({ code: newCode, language: newLang });
     };
 
     const onTimerUpdate = (seconds) => {
@@ -401,6 +419,7 @@ export default function Room() {
         localStreamRef.current.getTracks().forEach(t => t.stop());
       }
       destroyPeer('session ended');
+      clearRoomState();
       navigate(`/report/${roomId}`);
     };
 
@@ -558,7 +577,7 @@ export default function Room() {
       destroyPeer('room component cleanup');
       socket.disconnect();
     };
-  }, [roomId, hasJoined, turnLoaded, initiatePeer, destroyPeer, setRemoteParticipant, navigate, syncLocalMicState, user.id, user.name]);
+  }, [roomId, hasJoined, turnLoaded, initiatePeer, destroyPeer, setRemoteParticipant, navigate, syncLocalMicState, user.id, user.name, persistRoomState, clearRoomState]);
 
   useEffect(() => {
     if (!hasJoined || !socket.connected) return;
@@ -574,6 +593,21 @@ export default function Room() {
     };
   }, [destroyPeer]);
 
+  // Persist room state to localStorage so refreshing the page restores it
+  const persistRoomState = useCallback((updates) => {
+    try {
+      const existing = (() => {
+        try { return JSON.parse(localStorage.getItem(ROOM_STATE_KEY(roomId)) || '{}'); } catch { return {}; }
+      })();
+      localStorage.setItem(ROOM_STATE_KEY(roomId), JSON.stringify({ ...existing, ...updates }));
+    } catch { /* ignore quota errors */ }
+  }, [roomId]);
+
+  // Clear persisted room state (on leave or session end)
+  const clearRoomState = useCallback(() => {
+    try { localStorage.removeItem(ROOM_STATE_KEY(roomId)); } catch { /* ignore */ }
+  }, [roomId]);
+
   const handleEditorChange = useCallback((value) => {
     if (isRemoteChange.current) {
       isRemoteChange.current = false;
@@ -581,13 +615,15 @@ export default function Room() {
     }
     setCode(value);
     socket.emit('code-change', { roomId, code: value, language });
-  }, [roomId, language]);
+    persistRoomState({ code: value });
+  }, [roomId, language, persistRoomState]);
 
   const handleLanguageChange = useCallback((e) => {
     const newLang = e.target.value;
     setLanguage(newLang);
     socket.emit('code-change', { roomId, code, language: newLang });
-  }, [roomId, code]);
+    persistRoomState({ language: newLang });
+  }, [roomId, code, persistRoomState]);
 
   const handleEndSession = () => {
     setShowEndConfirm(true);
@@ -642,6 +678,7 @@ export default function Room() {
 
   const confirmEndSession = () => {
     setShowEndConfirm(false);
+    clearRoomState();
     const canvas = whiteboardCanvasRef.current;
     const whiteboardSnapshot = canvas ? canvas.toDataURL('image/png') : null;
     socket.emit('end-session', {
@@ -680,10 +717,28 @@ export default function Room() {
   };
 
   if (error) {
-    return <div className="min-h-screen flex items-center justify-center text-red-500 font-medium">{error}</div>;
+    return (
+      <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center gap-4 p-6">
+        <div className="w-14 h-14 rounded-2xl bg-red-50 flex items-center justify-center border border-red-100">
+          <AlertCircle size={28} className="text-red-500" />
+        </div>
+        <h2 className="text-xl font-bold text-gray-900">{error === 'Room not found' ? 'Session Not Found' : 'Something went wrong'}</h2>
+        <p className="text-sm text-gray-500 text-center max-w-xs">
+          {error === 'Room not found'
+            ? 'This interview session has ended or is no longer available.'
+            : error}
+        </p>
+        <button
+          onClick={() => { clearRoomState(); navigate('/dashboard'); }}
+          className="mt-2 px-6 py-2.5 bg-orange-500 hover:bg-orange-600 text-white text-sm font-semibold rounded-xl transition cursor-pointer"
+        >
+          Back to Dashboard
+        </button>
+      </div>
+    );
   }
 
-  if (!room) return <div className="min-h-screen flex items-center justify-center text-gray-500">Loading...</div>;
+  if (!room) return <div className="min-h-screen flex items-center justify-center text-gray-500">Loading…</div>;
 
   if (!hasJoined) {
     return (
@@ -745,7 +800,7 @@ export default function Room() {
             <div className="w-full flex flex-col gap-2">
               <button
                 disabled={!permissionGranted}
-                onClick={() => setHasJoined(true)}
+                onClick={() => { setHasJoined(true); persistRoomState({ hasJoined: true }); }}
                 className={`w-full py-3 rounded-xl font-bold text-sm flex items-center justify-center gap-2 transition duration-200 shadow-sm ${
                   permissionGranted
                     ? 'bg-orange-500 hover:bg-orange-600 active:bg-orange-700 text-white cursor-pointer'
@@ -926,7 +981,7 @@ export default function Room() {
                 className="w-full h-32 border border-gray-300 rounded-xl p-3 text-sm outline-none focus:border-orange-500 resize-none font-sans text-gray-800 shadow-inner"
                 placeholder="Write down observations, coding design critique, etc. Candidate will not see this."
                 value={notes}
-                onChange={(e) => setNotes(e.target.value)}
+                onChange={(e) => { setNotes(e.target.value); persistRoomState({ notes: e.target.value }); }}
               />
             </div>
           )}
@@ -1139,6 +1194,7 @@ export default function Room() {
                 <button
                   onClick={() => {
                     setShowLeaveConfirm(false);
+                    clearRoomState();
                     navigate('/dashboard');
                   }}
                   className="px-4 py-2 bg-gray-600 hover:bg-gray-700 active:bg-gray-800 text-white font-semibold text-sm rounded-xl transition duration-150 shadow-sm cursor-pointer"

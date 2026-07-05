@@ -87,7 +87,7 @@ export default function Signup() {
         method: 'POST',
         body: JSON.stringify({ name, email, password }),
       });
-      sessionStorage.setItem('sessionRole', role);
+      localStorage.setItem('sessionRole', role);
       login(data.token, data.user);
       navigate('/dashboard');
     } catch (err) {

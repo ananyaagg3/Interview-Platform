@@ -7,7 +7,7 @@ import { LogOut, Copy, Check, ExternalLink, AlertCircle, Plus, X, Video, LogIn, 
 export default function Dashboard() {
   const { user, login, logout } = useAuth();
   const navigate = useNavigate();
-  const sessionRole = sessionStorage.getItem('sessionRole') || 'interviewer'; // 'interviewer' | 'candidate'
+  const sessionRole = localStorage.getItem('sessionRole') || 'interviewer'; // 'interviewer' | 'candidate'
   const isInterviewerView = sessionRole === 'interviewer';
 
   const [activeTab, setActiveTab] = useState('bank'); // 'bank' or 'custom'
@@ -327,7 +327,7 @@ export default function Dashboard() {
                     onClick={() => {
                       setShowProfileDropdown(false);
                       logout();
-                      sessionStorage.removeItem('sessionRole');
+                      localStorage.removeItem('sessionRole');
                       navigate('/login');
                     }}
                     className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 flex items-center gap-2 transition cursor-pointer border-t border-gray-100"

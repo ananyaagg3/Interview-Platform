@@ -89,7 +89,7 @@ export default function Login() {
         body: JSON.stringify({ email, password }),
       });
       // store role alongside token so Dashboard can adapt
-      sessionStorage.setItem('sessionRole', role);
+      localStorage.setItem('sessionRole', role);
       login(data.token, data.user);
       navigate('/dashboard');
     } catch (err) {
