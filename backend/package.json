@@ -21,6 +21,7 @@
     "jsonwebtoken": "^9.0.3",
     "mongoose": "^9.7.0",
     "nanoid": "^5.1.11",
+    "resend": "^6.17.1",
     "socket.io": "^4.8.3"
   }
 }

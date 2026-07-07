@@ -1,0 +1,5 @@
+# Don't upload frontend or data files to Railway — backend only
+../frontend
+../gfg_database.json
+../.git
+node_modules

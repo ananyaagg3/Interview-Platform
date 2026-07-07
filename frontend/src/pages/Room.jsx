@@ -9,60 +9,68 @@ import Whiteboard from '../components/Whiteboard';
 import Markdown from '../components/Markdown';
 import { Video, VideoOff, Mic, MicOff, AlertCircle, Play, Sparkles, X } from 'lucide-react';
 
+// ─── localStorage helpers for room state persistence ───────────────────────
+const ROOM_STATE_KEY = (id) => `room_state_${id}`;
+
 export default function Room() {
   const { roomId } = useParams();
   const { user } = useAuth();
   const navigate = useNavigate();
 
+  // Restore persisted state from localStorage on first render
+  const getPersistedRoomState = () => {
+    try {
+      const raw = localStorage.getItem(ROOM_STATE_KEY(roomId));
+      if (raw) return JSON.parse(raw);
+    } catch { /* ignore */ }
+    return null;
+  };
+  const persisted = getPersistedRoomState();
+
   const [room, setRoom] = useState(null);
   const [role, setRole] = useState('');
   const [status, setStatus] = useState('waiting');
-  const [code, setCode] = useState('');
-  const [language, setLanguage] = useState('javascript');
+  const [code, setCode] = useState(persisted?.code || '');
+  const [language, setLanguage] = useState(persisted?.language || 'javascript');
   const [elapsed, setElapsed] = useState(0);
   const [error, setError] = useState('');
   const [disconnected, setDisconnected] = useState(false);
   const [showEndConfirm, setShowEndConfirm] = useState(false);
   const [showLeaveConfirm, setShowLeaveConfirm] = useState(false);
 
-  // V2 Added States
-  const [hasJoined, setHasJoined] = useState(false);
+  // If we have persisted state (user already joined this room), skip the preview screen
+  const [hasJoined, setHasJoined] = useState(Boolean(persisted?.hasJoined));
   const [localStream, setLocalStream] = useState(null);
   const [remoteStream, setRemoteStream] = useState(null);
   const [permissionGranted, setPermissionGranted] = useState(false);
   const [permissionError, setPermissionError] = useState('');
   const [micVolume, setMicVolume] = useState(0);
-  const [iceServers, setIceServers] = useState([{ urls: "stun:stun.l.google.com:19302" }]);
+  const [iceServers, setIceServers] = useState([{ urls: 'stun:stun.l.google.com:19302' }]);
   const [turnLoaded, setTurnLoaded] = useState(false);
-  const [videoStatus, setVideoStatus] = useState('waiting'); // 'waiting' | 'connected' | 'reconnecting'
+  const [videoStatus, setVideoStatus] = useState('waiting');
   const [remoteUserName, setRemoteUserName] = useState('');
-  const [activeTab, setActiveTab] = useState('code'); // 'code' | 'whiteboard'
-  
-  // Local stream controls
+  const [activeTab, setActiveTab] = useState('code');
+
   const [isMuted, setIsMuted] = useState(false);
   const [isCameraOff, setIsCameraOff] = useState(false);
-  
-  // Interviewer Notes
-  const [notes, setNotes] = useState('');
+  const [isRemoteMuted, setIsRemoteMuted] = useState(false);
+
+  const [notes, setNotes] = useState(persisted?.notes || '');
   const [viewedQuestionIndex, setViewedQuestionIndex] = useState(0);
 
-  // Auto-sync viewedQuestionIndex when the room active question changes
   useEffect(() => {
     if (!room || !room.selectedQuestions) return;
     const activeIdx = room.selectedQuestions.findIndex(q => {
-      return (q.problemSource === 'bank' && room.problemSource === 'bank' && 
+      return (q.problemSource === 'bank' && room.problemSource === 'bank' &&
               (q.problemId?._id?.toString() === room.problemId?._id?.toString() || q.problemId?.toString() === room.problemId?.toString() || q.problemId?._id === room.problemId)) ||
              (q.problemSource === 'custom' && room.problemSource === 'custom' &&
               q.customProblem?.title === room.customProblem?.title);
     });
     if (activeIdx !== -1) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
       setViewedQuestionIndex(activeIdx);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [room?.problemId, room?.customProblem, room?.selectedQuestions]);
 
-  // Change Question Modal States
   const [showChangeQuestionModal, setShowChangeQuestionModal] = useState(false);
   const [problems, setProblems] = useState([]);
   const [search, setSearch] = useState('');
@@ -73,21 +81,44 @@ export default function Room() {
   const [customDesc, setCustomDesc] = useState('');
   const [modalActiveTab, setModalActiveTab] = useState('bank');
 
-
   const editorRef = useRef(null);
   const isRemoteChange = useRef(false);
   const roomFetched = useRef(false);
-  const localStreamRef = useRef(null); // Ref to avoid stale closures
-  const iceServersRef = useRef([{ urls: "stun:stun.l.google.com:19302" }]);
-  
-  // WebRTC Refs
+  const localStreamRef = useRef(null);
+  const iceServersRef = useRef([{ urls: 'stun:stun.l.google.com:19302' }]);
+  const isMutedRef = useRef(false);
+  const remoteParticipantRef = useRef({ socketId: null, userId: null });
+
   const peerRef = useRef(null);
   const remoteSocketIdRef = useRef(null);
   const pendingSignalsRef = useRef([]);
   const reconnectTimerRef = useRef(null);
   const whiteboardCanvasRef = useRef(null);
 
-  // Fetch room data once on mount
+  const setRemoteParticipant = useCallback(({ socketId = null, userId = null, userName = '' } = {}) => {
+    remoteParticipantRef.current = { socketId, userId };
+    if (socketId) {
+      remoteSocketIdRef.current = socketId;
+    }
+    if (userName) {
+      setRemoteUserName(userName);
+    }
+    console.log('[RemoteMic] tracking remote participant', { socketId, userId, userName });
+  }, []);
+
+  const syncLocalMicState = useCallback((muted) => {
+    const eventName = muted ? 'participant-mic-muted' : 'participant-mic-unmuted';
+    const payload = { roomId };
+    console.log('[RemoteMic] Socket event emitted', { eventName, payload });
+    socket.emit(eventName, payload);
+  }, [roomId]);
+
+  useEffect(() => {
+    if (isRemoteMuted) {
+      console.log('[RemoteMic] Remote mute icon rendered', { isRemoteMuted });
+    }
+  }, [isRemoteMuted]);
+
   useEffect(() => {
     if (roomFetched.current) return;
     roomFetched.current = true;
@@ -104,17 +135,15 @@ export default function Room() {
     fetchRoom();
   }, [roomId]);
 
-  // Fetch TURN credentials once room has joined
   useEffect(() => {
     const fetchTurn = async () => {
       try {
         const turnData = await apiFetch('/rooms/turn-credentials');
-        // Backend now returns { iceServers: [...] } array format
         if (turnData.iceServers && turnData.iceServers.length > 0) {
           setIceServers(turnData.iceServers);
         }
       } catch (err) {
-        console.error("Error fetching TURN credentials, using STUN fallback:", err);
+        console.error('Error fetching TURN credentials, using STUN fallback:', err);
       } finally {
         setTurnLoaded(true);
       }
@@ -144,11 +173,13 @@ export default function Room() {
     }
 
     pendingSignalsRef.current = [];
+    remoteParticipantRef.current = { socketId: null, userId: null };
+    remoteSocketIdRef.current = null;
     setRemoteStream(null);
+    setIsRemoteMuted(false);
     setVideoStatus('waiting');
   }, []);
 
-  // WebRTC Peer connection helper
   const initiatePeer = useCallback((initiator, targetSocketId = remoteSocketIdRef.current) => {
     const currentStream = localStreamRef.current;
     if (!currentStream) {
@@ -211,6 +242,7 @@ export default function Room() {
         peerRef.current = null;
       }
       setRemoteStream(null);
+      setIsRemoteMuted(false);
       setVideoStatus('reconnecting');
     });
 
@@ -220,6 +252,7 @@ export default function Room() {
         peerRef.current = null;
       }
       setRemoteStream(null);
+      setIsRemoteMuted(false);
       setVideoStatus('reconnecting');
     });
 
@@ -245,7 +278,7 @@ export default function Room() {
     return peer;
   }, [destroyPeer, roomId]);
 
-  // Pre-session check stream acquisition and mic volume tracking
+  // Preview screen: request camera with mic volume analyser
   useEffect(() => {
     if (hasJoined) return;
 
@@ -260,7 +293,6 @@ export default function Room() {
         setPermissionGranted(true);
         setPermissionError('');
 
-        // Audio analyser for mic testing
         try {
           audioContext = new (window.AudioContext || window.webkitAudioContext)();
           const source = audioContext.createMediaStreamSource(stream);
@@ -284,11 +316,10 @@ export default function Room() {
           };
           checkVolume();
         } catch (audioErr) {
-          console.error("Audio analyser failed:", audioErr);
+          console.error('Audio analyser failed:', audioErr);
         }
-
       } catch (err) {
-        console.error("Permission error:", err);
+        console.error('Permission error:', err);
         setPermissionGranted(false);
         setPermissionError('Camera and microphone access is required to join this session');
       }
@@ -302,38 +333,72 @@ export default function Room() {
     };
   }, [hasJoined]);
 
-  // Handle local video playback on video element refs via callback refs
+  // Refresh/rejoin case: hasJoined is restored from localStorage as true,
+  // but the camera stream was lost — request it again silently.
+  useEffect(() => {
+    if (!hasJoined) return; // handled by preview effect above
+    if (localStreamRef.current) return; // already have a stream
+
+    const getMediaForRejoin = async () => {
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+        setLocalStream(stream);
+        setPermissionGranted(true);
+        console.log('[Refresh] Camera/mic re-acquired after page refresh');
+      } catch (err) {
+        console.warn('[Refresh] Could not re-acquire camera/mic after refresh:', err);
+        // Still allow the room to work without video — audio-only or view-only
+        setPermissionGranted(false);
+      }
+    };
+
+    getMediaForRejoin();
+  }, [hasJoined]);
+
   const localVideoRef = useCallback((node) => {
     if (node && localStream) {
       node.srcObject = localStream;
       node.play().catch(err => {
-        console.error("Local video playback failed:", err);
+        console.error('Local video playback failed:', err);
       });
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [localStream, isCameraOff]);
 
-  // Handle remote video playback on video element refs via callback refs
   const remoteVideoRef = useCallback((node) => {
     if (node && remoteStream) {
       node.srcObject = remoteStream;
       node.play().catch(err => {
-        console.error("Remote video playback failed:", err);
+        console.error('Remote video playback failed:', err);
       });
     }
   }, [remoteStream]);
 
-  // Keep localStreamRef in sync with state
   useEffect(() => {
     localStreamRef.current = localStream;
   }, [localStream]);
 
-  // Keep iceServersRef in sync with state
   useEffect(() => {
     iceServersRef.current = iceServers;
   }, [iceServers]);
 
-  // Main Socket room joining and event handling after Pre-session join clicked
+  useEffect(() => {
+    isMutedRef.current = isMuted;
+  }, [isMuted]);
+  // Persist room state to localStorage so refreshing the page restores it
+  const persistRoomState = useCallback((updates) => {
+    try {
+      const existing = (() => {
+        try { return JSON.parse(localStorage.getItem(ROOM_STATE_KEY(roomId)) || '{}'); } catch { return {}; }
+      })();
+      localStorage.setItem(ROOM_STATE_KEY(roomId), JSON.stringify({ ...existing, ...updates }));
+    } catch { /* ignore quota errors */ }
+  }, [roomId]);
+
+  // Clear persisted room state (on leave or session end)
+  const clearRoomState = useCallback(() => {
+    try { localStorage.removeItem(ROOM_STATE_KEY(roomId)); } catch { /* ignore */ }
+  }, [roomId]);
+
   useEffect(() => {
     if (!room || !hasJoined || !turnLoaded) return;
 
@@ -347,18 +412,25 @@ export default function Room() {
       if (state.currentCode) {
         isRemoteChange.current = true;
         setCode(state.currentCode);
+        persistRoomState({ code: state.currentCode });
       }
       if (state.currentLanguage) {
         setLanguage(state.currentLanguage);
+        persistRoomState({ language: state.currentLanguage });
       }
       setStatus(state.status);
       setRole(state.role);
+      if (typeof state.isMicMuted === 'boolean') {
+        setIsMuted(state.isMicMuted);
+      }
     };
 
     const onCodeChange = ({ code: newCode, language: newLang }) => {
       isRemoteChange.current = true;
       setCode(newCode);
       setLanguage(newLang);
+      // Persist server code changes so refresh shows the latest code
+      persistRoomState({ code: newCode, language: newLang });
     };
 
     const onTimerUpdate = (seconds) => {
@@ -380,11 +452,11 @@ export default function Room() {
     };
 
     const onSessionEnded = () => {
-      // Release camera/mic on session end — use ref to avoid stale closure
       if (localStreamRef.current) {
         localStreamRef.current.getTracks().forEach(t => t.stop());
       }
       destroyPeer('session ended');
+      clearRoomState();
       navigate(`/report/${roomId}`);
     };
 
@@ -392,16 +464,18 @@ export default function Room() {
       console.log('[Socket] existing-peers received', peers);
       const [peer] = peers;
       if (!peer) return;
-      remoteSocketIdRef.current = peer.socketId;
-      setRemoteUserName(peer.userName || 'Peer');
+      setRemoteParticipant({ socketId: peer.socketId, userId: peer.userId, userName: peer.userName || 'Peer' });
+      console.log('[RemoteMic] Remote React state updated from existing peer', { micMuted: Boolean(peer.micMuted) });
+      setIsRemoteMuted(Boolean(peer.micMuted));
     };
 
-    const onPeerJoined = ({ socketId, userName: peerName }) => {
-      console.log('[Socket] peer-joined received', { socketId, peerName });
+    const onPeerJoined = ({ socketId, userId, userName: peerName, micMuted }) => {
+      console.log('[Socket] peer-joined received', { socketId, userId, peerName, micMuted });
       if (!socketId) return;
-      remoteSocketIdRef.current = socketId;
+      setRemoteParticipant({ socketId, userId, userName: peerName || 'Peer' });
       pendingSignalsRef.current = [];
-      setRemoteUserName(peerName || 'Peer');
+      console.log('[RemoteMic] Remote React state updated from peer join', { micMuted: Boolean(micMuted) });
+      setIsRemoteMuted(Boolean(micMuted));
       setVideoStatus('reconnecting');
 
       reconnectTimerRef.current = setTimeout(() => {
@@ -422,8 +496,7 @@ export default function Room() {
           console.warn('[WebRTC] Ignoring signal from non-active peer', { from, activePeer: remoteSocketIdRef.current });
           return;
         }
-        remoteSocketIdRef.current = from;
-        if (payload.userName) setRemoteUserName(payload.userName);
+        setRemoteParticipant({ socketId: from, userId: payload.userId, userName: payload.userName });
       }
 
       let peer = peerRef.current;
@@ -450,12 +523,35 @@ export default function Room() {
       }
     };
 
-    const onPeerLeft = ({ socketId }) => {
-      console.log('[Socket] peer-left received', { socketId });
-      if (!socketId || socketId === remoteSocketIdRef.current) {
-        remoteSocketIdRef.current = null;
+    const onPeerLeft = ({ socketId, userId }) => {
+      console.log('[Socket] peer-left received', { socketId, userId });
+      const tracked = remoteParticipantRef.current;
+      if (!socketId || socketId === tracked.socketId || (userId && userId === tracked.userId)) {
         destroyPeer('remote peer left');
       }
+    };
+
+    const matchesRemoteParticipant = ({ socketId, userId }) => {
+      const tracked = remoteParticipantRef.current;
+      if (tracked.socketId && socketId && tracked.socketId === socketId) return true;
+      if (tracked.userId && userId && tracked.userId === userId) return true;
+      return !tracked.socketId && !tracked.userId;
+    };
+
+    const onParticipantMicMuted = ({ socketId, userId, userName, muted }) => {
+      console.log('[RemoteMic] Socket event received', { eventName: 'participant-mic-muted', socketId, userId, userName, muted });
+      if (!matchesRemoteParticipant({ socketId, userId })) return;
+      setRemoteParticipant({ socketId, userId, userName });
+      console.log('[RemoteMic] Remote React state updated', { isRemoteMuted: true });
+      setIsRemoteMuted(true);
+    };
+
+    const onParticipantMicUnmuted = ({ socketId, userId, userName, muted }) => {
+      console.log('[RemoteMic] Socket event received', { eventName: 'participant-mic-unmuted', socketId, userId, userName, muted });
+      if (!matchesRemoteParticipant({ socketId, userId })) return;
+      setRemoteParticipant({ socketId, userId, userName });
+      console.log('[RemoteMic] Remote React state updated', { isRemoteMuted: false });
+      setIsRemoteMuted(false);
     };
 
     const onError = (msg) => {
@@ -487,6 +583,8 @@ export default function Room() {
     socket.on('peer-joined', onPeerJoined);
     socket.on('signal', onSignal);
     socket.on('peer-left', onPeerLeft);
+    socket.on('participant-mic-muted', onParticipantMicMuted);
+    socket.on('participant-mic-unmuted', onParticipantMicUnmuted);
     socket.on('error', onError);
     socket.on('disconnect', onDisconnect);
     socket.on('connect', onConnect);
@@ -508,16 +606,21 @@ export default function Room() {
       socket.off('peer-joined', onPeerJoined);
       socket.off('signal', onSignal);
       socket.off('peer-left', onPeerLeft);
+      socket.off('participant-mic-muted', onParticipantMicMuted);
+      socket.off('participant-mic-unmuted', onParticipantMicUnmuted);
       socket.off('error', onError);
       socket.off('disconnect', onDisconnect);
       socket.off('connect', onConnect);
       destroyPeer('room component cleanup');
       socket.disconnect();
     };
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [roomId, hasJoined, turnLoaded, initiatePeer, destroyPeer, user.id, user.name]);
+  }, [roomId, hasJoined, turnLoaded, initiatePeer, destroyPeer, setRemoteParticipant, navigate, syncLocalMicState, user.id, user.name, persistRoomState, clearRoomState]);
 
-  // Clean up media tracks on unmount
+  useEffect(() => {
+    if (!hasJoined || !socket.connected) return;
+    syncLocalMicState(isMuted);
+  }, [hasJoined, isMuted, syncLocalMicState]);
+
   useEffect(() => {
     return () => {
       if (localStreamRef.current) {
@@ -534,13 +637,15 @@ export default function Room() {
     }
     setCode(value);
     socket.emit('code-change', { roomId, code: value, language });
-  }, [roomId, language]);
+    persistRoomState({ code: value });
+  }, [roomId, language, persistRoomState]);
 
   const handleLanguageChange = useCallback((e) => {
     const newLang = e.target.value;
     setLanguage(newLang);
     socket.emit('code-change', { roomId, code, language: newLang });
-  }, [roomId, code]);
+    persistRoomState({ language: newLang });
+  }, [roomId, code, persistRoomState]);
 
   const handleEndSession = () => {
     setShowEndConfirm(true);
@@ -557,7 +662,7 @@ export default function Room() {
         const data = await apiFetch('/rooms/problems');
         setProblems(data.problems);
       } catch (err) {
-        console.error("Failed to load problems in Room:", err);
+        console.error('Failed to load problems in Room:', err);
       }
     }
   };
@@ -578,7 +683,6 @@ export default function Room() {
         customProblem: { title: customTitle, description: customDesc }
       });
     }
-    // Reset selections
     setSelectedProblem(null);
     setCustomTitle('');
     setCustomDesc('');
@@ -596,16 +700,13 @@ export default function Room() {
 
   const confirmEndSession = () => {
     setShowEndConfirm(false);
-    
-    // Capture whiteboard snapshot if canvas is mounted
+    clearRoomState();
     const canvas = whiteboardCanvasRef.current;
-    const whiteboardSnapshot = canvas ? canvas.toDataURL("image/png") : null;
-    
-    // Emit end session with V2 inputs
-    socket.emit('end-session', { 
-      roomId, 
-      notes, 
-      whiteboardSnapshot 
+    const whiteboardSnapshot = canvas ? canvas.toDataURL('image/png') : null;
+    socket.emit('end-session', {
+      roomId,
+      notes,
+      whiteboardSnapshot
     });
   };
 
@@ -614,7 +715,9 @@ export default function Room() {
       const audioTrack = localStream.getAudioTracks()[0];
       if (audioTrack) {
         audioTrack.enabled = !audioTrack.enabled;
-        setIsMuted(!audioTrack.enabled);
+        const nextMuted = !audioTrack.enabled;
+        console.log('[RemoteMic] Local user muted toggle', { nextMuted, trackEnabled: audioTrack.enabled });
+        setIsMuted(nextMuted);
       }
     }
   };
@@ -636,19 +739,35 @@ export default function Room() {
   };
 
   if (error) {
-    return <div className="min-h-screen flex items-center justify-center text-red-500 font-medium">{error}</div>;
+    return (
+      <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center gap-4 p-6">
+        <div className="w-14 h-14 rounded-2xl bg-red-50 flex items-center justify-center border border-red-100">
+          <AlertCircle size={28} className="text-red-500" />
+        </div>
+        <h2 className="text-xl font-bold text-gray-900">{error === 'Room not found' ? 'Session Not Found' : 'Something went wrong'}</h2>
+        <p className="text-sm text-gray-500 text-center max-w-xs">
+          {error === 'Room not found'
+            ? 'This interview session has ended or is no longer available.'
+            : error}
+        </p>
+        <button
+          onClick={() => { clearRoomState(); navigate('/dashboard'); }}
+          className="mt-2 px-6 py-2.5 bg-orange-500 hover:bg-orange-600 text-white text-sm font-semibold rounded-xl transition cursor-pointer"
+        >
+          Back to Dashboard
+        </button>
+      </div>
+    );
   }
 
-  if (!room) return <div className="min-h-screen flex items-center justify-center text-gray-500">Loading...</div>;
+  if (!room) return <div className="min-h-screen flex items-center justify-center text-gray-500">Loading…</div>;
 
-  // Render Pre-session check screen if user hasn't clicked join yet
   if (!hasJoined) {
     return (
       <div className="min-h-screen bg-gray-50 flex flex-col justify-center items-center p-6 select-none font-sans">
         <div className="bg-white rounded-2xl border border-gray-100 shadow-xl max-w-lg w-full overflow-hidden">
-          {/* Accent Line */}
           <div className="h-1.5 w-full bg-gradient-to-r from-orange-500 to-red-500" />
-          
+
           <div className="p-8 flex flex-col items-center">
             <div className="w-12 h-12 bg-orange-50 text-orange-500 rounded-2xl flex items-center justify-center mb-4 border border-orange-100">
               <Sparkles size={24} className="animate-pulse" />
@@ -659,7 +778,6 @@ export default function Room() {
               Confirm your camera and microphone are working correctly.
             </p>
 
-            {/* Video preview container */}
             <div className="w-full aspect-video bg-gray-900 rounded-xl relative overflow-hidden mb-5 border border-gray-800 shadow-inner flex items-center justify-center">
               {permissionGranted && localStream ? (
                 <video
@@ -686,7 +804,6 @@ export default function Room() {
               )}
             </div>
 
-            {/* Microphone test indicator */}
             {permissionGranted && (
               <div className="w-full mb-6">
                 <div className="flex justify-between items-center text-xs font-semibold text-gray-500 mb-1">
@@ -702,27 +819,34 @@ export default function Room() {
               </div>
             )}
 
-            {/* Action Buttons */}
             <div className="w-full flex flex-col gap-2">
               <button
                 disabled={!permissionGranted}
-                onClick={() => setHasJoined(true)}
+                onClick={() => { setHasJoined(true); persistRoomState({ hasJoined: true }); }}
                 className={`w-full py-3 rounded-xl font-bold text-sm flex items-center justify-center gap-2 transition duration-200 shadow-sm ${
-                  permissionGranted 
-                    ? 'bg-orange-500 hover:bg-orange-600 active:bg-orange-700 text-white cursor-pointer' 
+                  permissionGranted
+                    ? 'bg-orange-500 hover:bg-orange-600 active:bg-orange-700 text-white cursor-pointer'
                     : 'bg-gray-100 text-gray-400 cursor-not-allowed'
                 }`}
               >
                 Join Session <Play size={16} fill="currentColor" />
               </button>
-              
+
               {!permissionGranted && permissionError && (
-                <button
-                  onClick={() => window.location.reload()}
-                  className="w-full py-2.5 bg-white border border-gray-300 text-gray-700 font-semibold text-xs rounded-xl hover:bg-gray-50 active:bg-gray-100 transition cursor-pointer"
-                >
-                  Retry Permissions
-                </button>
+                <>
+                  <button
+                    onClick={() => { setHasJoined(true); persistRoomState({ hasJoined: true }); }}
+                    className="w-full py-2.5 bg-orange-50 border border-orange-200 text-orange-700 font-semibold text-xs rounded-xl hover:bg-orange-100 active:bg-orange-200 transition cursor-pointer"
+                  >
+                    Join without Camera
+                  </button>
+                  <button
+                    onClick={() => window.location.reload()}
+                    className="w-full py-2.5 bg-white border border-gray-300 text-gray-700 font-semibold text-xs rounded-xl hover:bg-gray-50 active:bg-gray-100 transition cursor-pointer"
+                  >
+                    Retry Permissions
+                  </button>
+                </>
               )}
             </div>
           </div>
@@ -735,9 +859,8 @@ export default function Room() {
   const remoteUserLabel = () => {
     if (role === 'Interviewer') {
       return `${room.candidateId?.name || remoteUserName || 'Candidate'} (Candidate)`;
-    } else {
-      return `${room.interviewerId?.name || remoteUserName || 'Interviewer'} (Interviewer)`;
     }
+    return `${room.interviewerId?.name || remoteUserName || 'Interviewer'} (Interviewer)`;
   };
 
   const getViewedQuestion = () => {
@@ -766,16 +889,20 @@ export default function Room() {
     }
   };
 
+  const renderMuteIndicator = () => (
+    <div className="absolute top-2 right-2 bg-red-600 text-white p-1 rounded-full shadow">
+      <MicOff size={10} />
+    </div>
+  );
+
   return (
     <div className="h-screen flex flex-col bg-white select-none font-sans">
-      {/* Disconnection banner */}
       {disconnected && (
         <div className="bg-yellow-100 text-yellow-800 text-sm text-center py-2 font-semibold">
-          Connection lost — attempting to reconnect...
+          Connection lost - attempting to reconnect...
         </div>
       )}
 
-      {/* Header */}
       <header className="h-14 border-b border-gray-200 px-4 flex items-center justify-between shrink-0">
         <div className="flex items-center gap-3">
           <span className="font-bold text-gray-800">Room: {roomId}</span>
@@ -783,14 +910,14 @@ export default function Room() {
             {status.toUpperCase()}
           </span>
         </div>
-        
+
         <div className="font-mono text-gray-700 font-semibold flex items-center gap-2">
           {status === 'active' ? (
-             <span className={elapsed >= targetDuration * 60 ? 'text-red-500' : ''}>
-               {formatTime(elapsed)} / {targetDuration}:00
-             </span>
+            <span className={elapsed >= targetDuration * 60 ? 'text-red-500' : ''}>
+              {formatTime(elapsed)} / {targetDuration}:00
+            </span>
           ) : (
-             <span className="text-xs text-gray-500 font-sans">Waiting for candidate...</span>
+            <span className="text-xs text-gray-500 font-sans">Waiting for candidate...</span>
           )}
         </div>
 
@@ -799,14 +926,14 @@ export default function Room() {
             {role}
           </span>
           {role === 'Interviewer' ? (
-            <button 
+            <button
               onClick={handleEndSession}
               className="bg-orange-500 hover:bg-orange-600 active:bg-orange-700 text-white text-xs font-bold px-4 py-2 rounded-xl shadow-sm transition cursor-pointer"
             >
               End Session
             </button>
           ) : (
-            <button 
+            <button
               onClick={handleLeaveSession}
               className="bg-white hover:bg-gray-50 active:bg-gray-100 text-gray-700 text-xs font-bold px-4 py-2 rounded-xl border border-gray-300 shadow-sm transition cursor-pointer"
             >
@@ -816,23 +943,18 @@ export default function Room() {
         </div>
       </header>
 
-      {/* Main Content */}
       <div className="flex-1 flex overflow-hidden">
-        
-        {/* Column 1: Left Panel (30%) */}
         <div className="w-[30%] border-r border-gray-200 bg-gray-50 flex flex-col overflow-hidden">
-          {/* Problem description wrapper (scrollable) */}
           <div className="flex-1 overflow-y-auto p-6 flex flex-col">
-            {/* Tabs for Selected Questions */}
             {room.selectedQuestions && room.selectedQuestions.length > 1 && (
               <div className="flex border-b border-gray-200 mb-4 overflow-x-auto scrollbar-none shrink-0 gap-1 pr-1">
                 {room.selectedQuestions.map((q, idx) => {
-                  const isRoomActive = (q.problemSource === 'bank' && room.problemSource === 'bank' && 
+                  const isRoomActive = (q.problemSource === 'bank' && room.problemSource === 'bank' &&
                                         (q.problemId?._id?.toString() === room.problemId?._id?.toString() || q.problemId?.toString() === room.problemId?.toString() || q.problemId?._id === room.problemId)) ||
                                        (q.problemSource === 'custom' && room.problemSource === 'custom' &&
                                         q.customProblem?.title === room.customProblem?.title);
-                  
-                  const qDetails = q.problemSource === 'bank' 
+
+                  const qDetails = q.problemSource === 'bank'
                     ? { title: q.problemId?.title || 'Loading...', topic: q.problemId?.topic || '' }
                     : { title: q.customProblem?.title || 'Custom Problem', topic: 'Custom' };
 
@@ -843,8 +965,8 @@ export default function Room() {
                       key={idx}
                       onClick={() => handleTabClick(idx, q)}
                       className={`px-3 py-2 text-xs font-semibold rounded-t-xl transition-all cursor-pointer border-t border-x -mb-[1px] whitespace-nowrap flex items-center gap-1.5 ${
-                        isViewed 
-                          ? 'bg-white border-gray-200 text-orange-600 font-bold border-b-white' 
+                        isViewed
+                          ? 'bg-white border-gray-200 text-orange-600 font-bold border-b-white'
                           : 'bg-gray-100/50 border-transparent text-gray-500 hover:text-gray-700 hover:bg-gray-100 border-b-gray-200'
                       }`}
                     >
@@ -864,7 +986,7 @@ export default function Room() {
             {isViewedQBank && viewedQ && (
               <div className="flex gap-1.5 mb-4 shrink-0">
                 <span className="text-[10px] bg-gray-200 text-gray-700 px-2 py-0.5 rounded font-bold uppercase tracking-wider">{viewedQ.topic}</span>
-                <span className={`text-[10px] px-2 py-0.5 rounded font-bold uppercase tracking-wider ${viewedQ.difficulty==='Easy'?'bg-green-100 text-green-700':viewedQ.difficulty==='Medium'?'bg-yellow-100 text-yellow-700':'bg-red-100 text-red-700'}`}>
+                <span className={`text-[10px] px-2 py-0.5 rounded font-bold uppercase tracking-wider ${viewedQ.difficulty === 'Easy' ? 'bg-green-100 text-green-700' : viewedQ.difficulty === 'Medium' ? 'bg-yellow-100 text-yellow-700' : 'bg-red-100 text-red-700'}`}>
                   {viewedQ.difficulty}
                 </span>
               </div>
@@ -881,8 +1003,7 @@ export default function Room() {
               </button>
             )}
           </div>
-          
-          {/* Interviewer Notes (Only visible to Interviewer) */}
+
           {role === 'Interviewer' && (
             <div className="border-t border-gray-200 bg-white p-4 shrink-0 flex flex-col">
               <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Your Notes (private)</label>
@@ -890,22 +1011,20 @@ export default function Room() {
                 className="w-full h-32 border border-gray-300 rounded-xl p-3 text-sm outline-none focus:border-orange-500 resize-none font-sans text-gray-800 shadow-inner"
                 placeholder="Write down observations, coding design critique, etc. Candidate will not see this."
                 value={notes}
-                onChange={(e) => setNotes(e.target.value)}
+                onChange={(e) => { setNotes(e.target.value); persistRoomState({ notes: e.target.value }); }}
               />
             </div>
           )}
         </div>
 
-        {/* Column 2: Center Panel (Flex-1) */}
         <div className="flex-1 flex flex-col bg-white">
-          {/* Tab bar */}
           <div className="h-11 border-b border-gray-200 bg-gray-50 flex items-center px-4 shrink-0 justify-between">
             <div className="flex border-b border-transparent h-full">
               <button
                 onClick={() => setActiveTab('code')}
                 className={`px-4 h-full text-xs font-bold transition-all relative border-b-2 ${
-                  activeTab === 'code' 
-                    ? 'border-orange-500 text-orange-600' 
+                  activeTab === 'code'
+                    ? 'border-orange-500 text-orange-600'
                     : 'border-transparent text-gray-500 hover:text-gray-700'
                 }`}
               >
@@ -914,8 +1033,8 @@ export default function Room() {
               <button
                 onClick={() => setActiveTab('whiteboard')}
                 className={`px-4 h-full text-xs font-bold transition-all relative border-b-2 ${
-                  activeTab === 'whiteboard' 
-                    ? 'border-orange-500 text-orange-600' 
+                  activeTab === 'whiteboard'
+                    ? 'border-orange-500 text-orange-600'
                     : 'border-transparent text-gray-500 hover:text-gray-700'
                 }`}
               >
@@ -923,10 +1042,9 @@ export default function Room() {
               </button>
             </div>
 
-            {/* Language dropdown (only active/visible on editor tab) */}
             <div className={activeTab === 'code' ? 'block' : 'hidden'}>
-              <select 
-                value={language} 
+              <select
+                value={language}
                 onChange={handleLanguageChange}
                 className="bg-white border border-gray-300 rounded-lg py-1 px-3 text-xs font-bold outline-none text-gray-700 cursor-pointer shadow-sm focus:border-orange-500"
               >
@@ -938,7 +1056,6 @@ export default function Room() {
             </div>
           </div>
 
-          {/* Monaco Code Editor (live but conditionally visible via class) */}
           <div className={activeTab === 'code' ? 'flex-1 flex flex-col h-full overflow-hidden' : 'hidden'}>
             <Editor
               height="100%"
@@ -956,21 +1073,17 @@ export default function Room() {
             />
           </div>
 
-          {/* Whiteboard (live but conditionally visible via class) */}
           <div className={activeTab === 'whiteboard' ? 'flex-1 h-full' : 'hidden'}>
-            <Whiteboard 
-              roomId={roomId} 
-              socket={socket} 
-              canvasRef={whiteboardCanvasRef} 
+            <Whiteboard
+              roomId={roomId}
+              socket={socket}
+              canvasRef={whiteboardCanvasRef}
             />
           </div>
         </div>
 
-        {/* Column 3: Right Panel (Video stack ~280px) */}
         <div className="w-[280px] bg-gray-50 flex flex-col border-l border-gray-200 shrink-0 p-4 justify-between">
-          {/* Video Stack */}
           <div className="flex-1 flex flex-col gap-4 overflow-y-auto">
-            {/* Remote Peer Video */}
             <div className="flex flex-col">
               <span className="text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-1.5">Remote Feed</span>
               <div className="w-full aspect-video bg-gray-950 rounded-xl relative overflow-hidden border border-gray-900 shadow flex items-center justify-center">
@@ -996,14 +1109,13 @@ export default function Room() {
                     )}
                   </div>
                 )}
-                {/* Username label overlay */}
+                {isRemoteMuted && renderMuteIndicator()}
                 <div className="absolute bottom-2 left-2 bg-black/60 backdrop-blur-sm px-2 py-0.5 rounded text-[9px] text-white font-medium">
                   {remoteUserLabel()}
                 </div>
               </div>
             </div>
 
-            {/* Local Video */}
             <div className="flex flex-col">
               <span className="text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-1.5">Your Feed</span>
               <div className="w-full aspect-video bg-gray-950 rounded-xl relative overflow-hidden border border-gray-900 shadow flex items-center justify-center">
@@ -1020,12 +1132,7 @@ export default function Room() {
                     <VideoOff size={24} />
                   </div>
                 )}
-                {/* Local Mute Indicator Overlay */}
-                {isMuted && (
-                  <div className="absolute top-2 right-2 bg-red-600 text-white p-1 rounded-full shadow">
-                    <MicOff size={10} />
-                  </div>
-                )}
+                {isMuted && renderMuteIndicator()}
                 <div className="absolute bottom-2 left-2 bg-black/60 backdrop-blur-sm px-2 py-0.5 rounded text-[9px] text-white font-medium">
                   You ({role})
                 </div>
@@ -1033,40 +1140,36 @@ export default function Room() {
             </div>
           </div>
 
-          {/* Video controls bar at the bottom */}
           <div className="border-t border-gray-200 pt-4 mt-4 shrink-0 flex items-center justify-center gap-3">
             <button
               onClick={toggleMute}
               className={`w-10 h-10 rounded-full flex items-center justify-center transition border ${
-                isMuted 
-                  ? 'bg-red-50 text-red-600 border-red-200 hover:bg-red-100' 
+                isMuted
+                  ? 'bg-red-50 text-red-600 border-red-200 hover:bg-red-100'
                   : 'bg-white text-gray-600 border-gray-300 hover:bg-gray-100'
               }`}
-              title={isMuted ? "Unmute Mic" : "Mute Mic"}
+              title={isMuted ? 'Unmute Mic' : 'Mute Mic'}
             >
               {isMuted ? <MicOff size={16} /> : <Mic size={16} />}
             </button>
             <button
               onClick={toggleCamera}
               className={`w-10 h-10 rounded-full flex items-center justify-center transition border ${
-                isCameraOff 
-                  ? 'bg-red-50 text-red-600 border-red-200 hover:bg-red-100' 
+                isCameraOff
+                  ? 'bg-red-50 text-red-600 border-red-200 hover:bg-red-100'
                   : 'bg-white text-gray-600 border-gray-300 hover:bg-gray-100'
               }`}
-              title={isCameraOff ? "Show Camera" : "Hide Camera"}
+              title={isCameraOff ? 'Show Camera' : 'Hide Camera'}
             >
               {isCameraOff ? <VideoOff size={16} /> : <Video size={16} />}
             </button>
           </div>
         </div>
-
       </div>
 
-      {/* End Session Confirmation Modal */}
       {showEndConfirm && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-xs flex items-center justify-center z-50 p-4 transition-all duration-200">
           <div className="bg-white rounded-2xl shadow-xl border border-gray-100 max-w-md w-full overflow-hidden transform transition-all scale-100 animate-in fade-in zoom-in-95 duration-200">
-            {/* Top accent line */}
             <div className="h-1.5 w-full bg-gradient-to-r from-red-500 to-orange-500" />
             <div className="p-6">
               <div className="flex items-center gap-3 mb-3">
@@ -1079,13 +1182,13 @@ export default function Room() {
                 Are you sure you want to conclude this session? This will lock the workspace, capture the whiteboard canvas, and automatically generate a candidate evaluation report using AI.
               </p>
               <div className="flex justify-end gap-3">
-                <button 
+                <button
                   onClick={() => setShowEndConfirm(false)}
                   className="px-4 py-2 border border-gray-300 hover:bg-gray-50 active:bg-gray-100 text-gray-700 font-semibold text-sm rounded-xl transition duration-150 cursor-pointer"
                 >
                   Cancel
                 </button>
-                <button 
+                <button
                   onClick={confirmEndSession}
                   className="px-4 py-2 bg-red-600 hover:bg-red-700 active:bg-red-800 text-white font-semibold text-sm rounded-xl transition duration-150 shadow-sm cursor-pointer"
                 >
@@ -1097,11 +1200,9 @@ export default function Room() {
         </div>
       )}
 
-      {/* Leave Session Confirmation Modal (for Candidates) */}
       {showLeaveConfirm && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-xs flex items-center justify-center z-50 p-4 transition-all duration-200">
           <div className="bg-white rounded-2xl shadow-xl border border-gray-100 max-w-md w-full overflow-hidden transform transition-all scale-100 animate-in fade-in zoom-in-95 duration-200">
-            {/* Top accent line */}
             <div className="h-1.5 w-full bg-gradient-to-r from-gray-300 to-gray-400" />
             <div className="p-6">
               <div className="flex items-center gap-3 mb-3">
@@ -1114,15 +1215,16 @@ export default function Room() {
                 Are you sure you want to leave this session? You can rejoin later using the same link or room code, as long as the interviewer has not ended the session.
               </p>
               <div className="flex justify-end gap-3">
-                <button 
+                <button
                   onClick={() => setShowLeaveConfirm(false)}
                   className="px-4 py-2 border border-gray-300 hover:bg-gray-50 active:bg-gray-100 text-gray-700 font-semibold text-sm rounded-xl transition duration-150 cursor-pointer"
                 >
                   Cancel
                 </button>
-                <button 
+                <button
                   onClick={() => {
                     setShowLeaveConfirm(false);
+                    clearRoomState();
                     navigate('/dashboard');
                   }}
                   className="px-4 py-2 bg-gray-600 hover:bg-gray-700 active:bg-gray-800 text-white font-semibold text-sm rounded-xl transition duration-150 shadow-sm cursor-pointer"
@@ -1135,19 +1237,16 @@ export default function Room() {
         </div>
       )}
 
-      {/* Change Question Modal (Interviewer Only) */}
       {showChangeQuestionModal && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-xs flex items-center justify-center z-50 p-4 transition-all duration-200">
           <div className="bg-white rounded-2xl shadow-2xl border border-gray-100 max-w-xl w-full overflow-hidden transform transition-all scale-100 animate-in fade-in zoom-in-95 duration-200 max-h-[85vh] flex flex-col">
-            {/* Top accent line */}
             <div className="h-1.5 w-full bg-gradient-to-r from-orange-500 to-red-500 shrink-0" />
-            
-            {/* Modal Header */}
+
             <div className="px-6 py-4 border-b border-gray-200 flex justify-between items-center shrink-0">
               <h3 className="text-lg font-bold text-gray-950">
                 Change Active Question
               </h3>
-              <button 
+              <button
                 onClick={() => {
                   setShowChangeQuestionModal(false);
                   setSelectedProblem(null);
@@ -1160,17 +1259,16 @@ export default function Room() {
                 <X size={18} />
               </button>
             </div>
-            
-            {/* Modal Body */}
+
             <div className="p-6 overflow-y-auto flex-1 flex flex-col min-h-0">
               <div className="flex border-b mb-4 shrink-0">
-                <button 
+                <button
                   className={`flex-1 py-2 text-sm font-semibold border-b-2 transition-colors cursor-pointer ${modalActiveTab === 'bank' ? 'border-orange-500 text-orange-600' : 'border-transparent text-gray-500 hover:text-gray-700'}`}
                   onClick={() => setModalActiveTab('bank')}
                 >
                   Question Bank
                 </button>
-                <button 
+                <button
                   className={`flex-1 py-2 text-sm font-semibold border-b-2 transition-colors cursor-pointer ${modalActiveTab === 'custom' ? 'border-orange-500 text-orange-600' : 'border-transparent text-gray-500 hover:text-gray-700'}`}
                   onClick={() => setModalActiveTab('custom')}
                 >
@@ -1181,8 +1279,8 @@ export default function Room() {
               {modalActiveTab === 'bank' ? (
                 <div className="flex-1 flex flex-col min-h-[250px] mb-4">
                   <div className="flex flex-wrap gap-2 mb-3 shrink-0">
-                    <input 
-                      type="text" placeholder="Search..." 
+                    <input
+                      type="text" placeholder="Search..."
                       className="flex-[2] min-w-[120px] border border-gray-300 p-2 rounded-xl text-sm outline-none focus:border-orange-500 shadow-sm"
                       value={search} onChange={e => setSearch(e.target.value)}
                     />
@@ -1199,15 +1297,15 @@ export default function Room() {
                   </div>
                   <div className="border border-gray-200 rounded-xl flex-1 overflow-y-auto max-h-[200px] shadow-inner bg-gray-50">
                     {filteredProblems.map(p => (
-                      <div 
-                        key={p._id} 
+                      <div
+                        key={p._id}
                         onClick={() => setSelectedProblem(p)}
                         className={`p-3 border-b border-gray-100 cursor-pointer hover:bg-orange-50/50 transition-colors ${selectedProblem?._id === p._id ? 'bg-orange-50 border-l-4 border-l-orange-500 font-semibold' : ''}`}
                       >
                         <div className="font-semibold text-sm text-gray-800">{p.title}</div>
                         <div className="flex gap-2 mt-1.5">
                           <span className="text-[10px] bg-gray-200 text-gray-700 px-2 py-0.5 rounded font-bold uppercase tracking-wider">{p.topic}</span>
-                          <span className={`text-[10px] px-2 py-0.5 rounded font-bold uppercase tracking-wider ${p.difficulty==='Easy'?'bg-green-100 text-green-700':p.difficulty==='Medium'?'bg-yellow-100 text-yellow-700':'bg-red-100 text-red-700'}`}>{p.difficulty}</span>
+                          <span className={`text-[10px] px-2 py-0.5 rounded font-bold uppercase tracking-wider ${p.difficulty === 'Easy' ? 'bg-green-100 text-green-700' : p.difficulty === 'Medium' ? 'bg-yellow-100 text-yellow-700' : 'bg-red-100 text-red-700'}`}>{p.difficulty}</span>
                         </div>
                       </div>
                     ))}
@@ -1216,13 +1314,13 @@ export default function Room() {
                 </div>
               ) : (
                 <div className="flex-1 flex flex-col gap-3 min-h-[250px] mb-4">
-                  <input 
-                    type="text" placeholder="Problem Title" 
+                  <input
+                    type="text" placeholder="Problem Title"
                     className="border border-gray-300 p-2.5 rounded-xl text-sm outline-none focus:border-orange-500 shadow-sm"
                     value={customTitle} onChange={e => setCustomTitle(e.target.value)}
                   />
-                  <textarea 
-                    placeholder="Problem Description" 
+                  <textarea
+                    placeholder="Problem Description"
                     className="flex-1 border border-gray-300 p-2.5 rounded-xl text-sm outline-none focus:border-orange-500 resize-none shadow-sm min-h-[140px]"
                     value={customDesc} onChange={e => setCustomDesc(e.target.value)}
                     maxLength={2000}
@@ -1231,7 +1329,7 @@ export default function Room() {
                 </div>
               )}
 
-              <button 
+              <button
                 onClick={handleChangeQuestionConfirm}
                 className="w-full bg-orange-500 hover:bg-orange-600 active:bg-orange-700 text-white font-bold py-3 rounded-xl transition shadow-sm hover:shadow-md active:scale-[0.99] cursor-pointer shrink-0"
               >

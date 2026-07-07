@@ -89,7 +89,7 @@ export default function Login() {
         body: JSON.stringify({ email, password }),
       });
       // store role alongside token so Dashboard can adapt
-      sessionStorage.setItem('sessionRole', role);
+      localStorage.setItem('sessionRole', role);
       login(data.token, data.user);
       navigate('/dashboard');
     } catch (err) {
@@ -109,7 +109,7 @@ export default function Login() {
         method: 'POST',
         body: JSON.stringify({ email: forgotEmail }),
       });
-      setSuccessMessage('A 6-digit reset code has been sent! Check your backend console.');
+      setSuccessMessage('A reset code has been sent to your email if it is registered.');
       setTimeout(() => {
         setStep('forgot-reset');
         setError('');

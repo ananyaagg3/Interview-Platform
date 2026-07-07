@@ -2,6 +2,7 @@ import Room from '../models/Room.js';
 
 const activeRooms = new Map();
 const whiteboardEvents = new Map();
+const roomMicStates = new Map();
 let ioInstance = null;
 
 export const getIo = () => ioInstance;
@@ -19,6 +20,27 @@ export default function setupSocket(io) {
 
   io.on('connection', (socket) => {
     console.log(`Socket connected: ${socket.id}`);
+
+    const setRoomMicState = (roomId, userId, muted) => {
+      if (!roomId || !userId) return;
+      if (!roomMicStates.has(roomId)) {
+        roomMicStates.set(roomId, new Map());
+      }
+      roomMicStates.get(roomId).set(userId, muted);
+    };
+
+    const getRoomMicState = (roomId, userId) => {
+      if (!roomId || !userId) return false;
+      return roomMicStates.get(roomId)?.get(userId) ?? false;
+    };
+
+    const buildParticipantMicPayload = ({ roomId, socketId = socket.id, userId = socket.data.userId, userName = socket.data.userName, muted }) => ({
+      roomId,
+      socketId,
+      userId,
+      userName,
+      muted
+    });
 
     socket.on('join-room', async ({ roomId, userId, userName }) => {
       try {
@@ -48,6 +70,7 @@ export default function setupSocket(io) {
         socket.data.userId = userId;
         socket.data.userName = userName;
         socket.data.role = role;
+        socket.data.isMicMuted = getRoomMicState(roomId, userId);
 
         if (room.interviewerId && room.candidateId && room.status === 'waiting') {
           room.status = 'active';
@@ -66,7 +89,8 @@ export default function setupSocket(io) {
           currentLanguage: room.currentLanguage,
           sessionStartedAt: room.sessionStartedAt,
           status: room.status,
-          role
+          role,
+          isMicMuted: socket.data.isMicMuted
         });
 
         // Send current whiteboard history to the socket
@@ -84,21 +108,22 @@ export default function setupSocket(io) {
                 socketId,
                 userId: peerSocket.data.userId,
                 userName: peerSocket.data.userName,
-                role: peerSocket.data.role
+                role: peerSocket.data.role,
+                micMuted: getRoomMicState(roomId, peerSocket.data.userId)
               };
             })
             .filter(Boolean);
 
-          console.log(`[room:${roomId}] notifying ${otherSocketIds.length} existing peer(s) about socket=${socket.id}`);
+          console.log(`[room:${roomId}] existing peer mic states`, peers.map(peer => ({ userId: peer.userId, socketId: peer.socketId, micMuted: peer.micMuted })));
           socket.emit('existing-peers', peers);
           socket.to(roomId).emit('peer-joined', {
             socketId: socket.id,
             userId,
             userName,
-            role
+            role,
+            micMuted: getRoomMicState(roomId, userId)
           });
         }
-
       } catch (err) {
         console.error(err);
         socket.emit('error', 'Server error joining room');
@@ -106,13 +131,10 @@ export default function setupSocket(io) {
     });
 
     socket.on('code-change', async ({ roomId, code, language }) => {
-      // Broadcast to others in the room
       socket.to(roomId).emit('code-change', { code, language });
-      // Update DB asynchronously
       Room.updateOne({ roomId }, { currentCode: code, currentLanguage: language }).catch(console.error);
     });
 
-    // Whiteboard drawing event
     socket.on('whiteboard-draw', ({ roomId, event }) => {
       if (!whiteboardEvents.has(roomId)) {
         whiteboardEvents.set(roomId, []);
@@ -121,13 +143,11 @@ export default function setupSocket(io) {
       socket.to(roomId).emit('whiteboard-draw', event);
     });
 
-    // Whiteboard clear event
     socket.on('whiteboard-clear', ({ roomId }) => {
       whiteboardEvents.set(roomId, []);
       io.to(roomId).emit('whiteboard-clear');
     });
 
-    // WebRTC signaling
     socket.on('signal', ({ roomId, signalData, to }) => {
       const signalType = signalData?.type || (signalData?.candidate ? 'candidate' : 'unknown');
       console.log(`[room:${roomId}] signal ${signalType} from=${socket.id}${to ? ` to=${to}` : ' broadcast'}`);
@@ -147,7 +167,24 @@ export default function setupSocket(io) {
       socket.to(roomId).emit('signal', payload);
     });
 
-    // Change active question event
+    socket.on('participant-mic-muted', ({ roomId }) => {
+      if (!roomId || socket.data.roomId !== roomId) return;
+      setRoomMicState(roomId, socket.data.userId, true);
+      socket.data.isMicMuted = true;
+      const payload = buildParticipantMicPayload({ roomId, muted: true });
+      console.log('[Socket] participant-mic-muted broadcast', payload);
+      socket.to(roomId).emit('participant-mic-muted', payload);
+    });
+
+    socket.on('participant-mic-unmuted', ({ roomId }) => {
+      if (!roomId || socket.data.roomId !== roomId) return;
+      setRoomMicState(roomId, socket.data.userId, false);
+      socket.data.isMicMuted = false;
+      const payload = buildParticipantMicPayload({ roomId, muted: false });
+      console.log('[Socket] participant-mic-unmuted broadcast', payload);
+      socket.to(roomId).emit('participant-mic-unmuted', payload);
+    });
+
     socket.on('change-question', async ({ roomId, problemSource, problemId, customProblem }) => {
       try {
         const room = await Room.findOne({ roomId });
@@ -161,19 +198,16 @@ export default function setupSocket(io) {
             room.customProblem = customProblem;
           }
 
-          // Initialize selectedQuestions if it's undefined
           if (!room.selectedQuestions) {
             room.selectedQuestions = [];
           }
 
-          // Check if this question is already in selectedQuestions
           const alreadyExists = room.selectedQuestions.some(q => {
             if (q.problemSource !== problemSource) return false;
             if (problemSource === 'bank') {
               return q.problemId?.toString() === problemId?.toString();
-            } else {
-              return q.customProblem?.title === customProblem?.title;
             }
+            return q.customProblem?.title === customProblem?.title;
           });
 
           if (!alreadyExists) {
@@ -212,7 +246,7 @@ export default function setupSocket(io) {
           });
         }
       } catch (err) {
-        console.error("Socket change-question error:", err);
+        console.error('Socket change-question error:', err);
       }
     });
 
@@ -222,14 +256,14 @@ export default function setupSocket(io) {
         if (room && room.status !== 'ended') {
           room.status = 'ended';
           room.sessionEndedAt = new Date();
-          room.interviewerNotes = notes || "";
+          room.interviewerNotes = notes || '';
           room.whiteboardSnapshot = whiteboardSnapshot || null;
           await room.save();
           activeRooms.delete(roomId);
-          whiteboardEvents.delete(roomId); // Clean up in-memory whiteboard history
+          whiteboardEvents.delete(roomId);
+          roomMicStates.delete(roomId);
           io.to(roomId).emit('session-ended');
 
-          // Asynchronously trigger AI feedback generation using dynamic import
           import('../controllers/roomController.js').then(({ generateFeedbackReport }) => {
             generateFeedbackReport(roomId).catch(console.error);
           });
@@ -251,4 +285,3 @@ export default function setupSocket(io) {
     });
   });
 }
-

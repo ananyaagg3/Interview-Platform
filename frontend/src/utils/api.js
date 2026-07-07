@@ -4,7 +4,7 @@ if (API_BASE_URL && !API_BASE_URL.endsWith('/api') && !API_BASE_URL.endsWith('/a
 }
 
 export const apiFetch = async (endpoint, options = {}) => {
-  const token = sessionStorage.getItem('token');
+  const token = localStorage.getItem('token');
   const headers = {
     'Content-Type': 'application/json',
     ...(token && { Authorization: `Bearer ${token}` }),
