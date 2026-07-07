@@ -44,7 +44,7 @@ const allowedOrigin = (origin, callback) => {
 };
 
 // CORS configuration for Express
-app.use(cors({ origin: allowedOrigin, methods: ['GET', 'POST'], credentials: true }));
+app.use(cors({ origin: allowedOrigin, methods: ['GET', 'POST', 'PUT', 'DELETE'], credentials: true }));
 
 // Parse JSON bodies — increase limit to handle base64 whiteboard snapshots
 app.use(express.json({ limit: '10mb' }));
@@ -52,7 +52,7 @@ app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
 // Configure Socket.IO
 const io = new Server(server, {
-  cors: { origin: allowedOrigin, methods: ['GET', 'POST'], credentials: true },
+  cors: { origin: allowedOrigin, methods: ['GET', 'POST', 'PUT', 'DELETE'], credentials: true },
   maxHttpBufferSize: 10 * 1024 * 1024 // 10MB — needed for whiteboard snapshot base64
 });
 
@@ -62,6 +62,9 @@ setupSocket(io);
 // Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/rooms', roomRoutes);
+
+// Health check — used by Railway to confirm service is up
+app.get('/api/health', (req, res) => res.json({ status: 'ok', timestamp: new Date().toISOString() }));
 
 // Database connection
 const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/interview-platform';

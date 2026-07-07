@@ -64,7 +64,8 @@ export const forgotPassword = async (req, res) => {
 
     const user = await User.findOne({ email });
     if (!user) {
-      return res.status(400).json({ error: 'User with this email does not exist' });
+      // Don't reveal if user exists — just say it was sent
+      return res.status(200).json({ message: 'If that email is registered, a reset code has been sent.' });
     }
 
     const resetCode = Math.floor(100000 + Math.random() * 900000).toString();
@@ -74,12 +75,49 @@ export const forgotPassword = async (req, res) => {
     user.resetCodeExpires = resetCodeExpires;
     await user.save();
 
-    console.log('\n==================================================');
-    console.log(`[PASSWORD RESET CODE] for ${email}: ${resetCode}`);
-    console.log(`Expires at: ${resetCodeExpires.toLocaleTimeString()}`);
-    console.log('==================================================\n');
+    // Try to send email via Resend if API key is configured
+    const resendApiKey = process.env.RESEND_API_KEY;
+    if (resendApiKey) {
+      try {
+        const fromAddress = process.env.RESEND_FROM_EMAIL || 'noreply@yourdomain.com';
+        const emailRes = await fetch('https://api.resend.com/emails', {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${resendApiKey}`,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            from: fromAddress,
+            to: [email],
+            subject: 'Your Password Reset Code',
+            html: `
+              <div style="font-family:sans-serif;max-width:480px;margin:0 auto">
+                <h2 style="color:#FF6B35">Password Reset</h2>
+                <p>Your 6-digit reset code is:</p>
+                <div style="font-size:32px;font-weight:bold;letter-spacing:8px;color:#111;margin:16px 0">${resetCode}</div>
+                <p style="color:#666;font-size:14px">This code expires in 10 minutes. If you did not request this, ignore this email.</p>
+              </div>
+            `
+          })
+        });
+        if (!emailRes.ok) {
+          const errBody = await emailRes.text();
+          console.error('[Resend] Email send failed:', errBody);
+        } else {
+          console.log(`[Password Reset] Email sent to ${email}`);
+        }
+      } catch (emailErr) {
+        console.error('[Resend] Error sending email:', emailErr);
+      }
+    } else {
+      // Fallback: log to console (development only)
+      console.log('\n==================================================');
+      console.log(`[PASSWORD RESET CODE] for ${email}: ${resetCode}`);
+      console.log(`Expires at: ${resetCodeExpires.toLocaleTimeString()}`);
+      console.log('==================================================\n');
+    }
 
-    res.status(200).json({ message: 'Reset code generated successfully.' });
+    res.status(200).json({ message: 'If that email is registered, a reset code has been sent.' });
   } catch (err) {
     console.error('Forgot password error:', err);
     res.status(500).json({ error: 'Server error during forgot password' });

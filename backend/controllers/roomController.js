@@ -92,6 +92,34 @@ export const getPastSessions = async (req, res) => {
   }
 };
 
+export const deleteRoom = async (req, res) => {
+  try {
+    const { roomId } = req.params;
+    const userId = req.user.id;
+
+    const room = await Room.findOne({ roomId });
+    if (!room) {
+      return res.status(404).json({ error: 'Room not found' });
+    }
+
+    // Only the interviewer who created the room can delete it
+    if (room.interviewerId.toString() !== userId) {
+      return res.status(403).json({ error: 'Only the interviewer can delete this session' });
+    }
+
+    // Prevent deleting active sessions
+    if (room.status === 'active') {
+      return res.status(400).json({ error: 'Cannot delete an active session. End it first.' });
+    }
+
+    await Room.deleteOne({ roomId });
+    res.status(200).json({ message: 'Session deleted successfully' });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Server error' });
+  }
+};
+
 export const getProblems = async (req, res) => {
   try {
     const problems = await Problem.find({});

@@ -99,7 +99,7 @@ export default function Dashboard() {
   const [search, setSearch] = useState('');
   const [topicFilter, setTopicFilter] = useState('');
   const [difficultyFilter, setDifficultyFilter] = useState('');
-  const [selectedProblem, setSelectedProblem] = useState(null);
+
   const [selectedQuestions, setSelectedQuestions] = useState([]);
 
   const [customTitle, setCustomTitle] = useState('');
@@ -120,7 +120,10 @@ export default function Dashboard() {
 
   const [pastRooms, setPastRooms] = useState([]);
 
-  const hostedRooms = pastRooms.filter(r => r.interviewerId === user?.id);
+  const hostedRooms = pastRooms.filter(r => {
+    const iid = r.interviewerId?._id || r.interviewerId;
+    return iid?.toString() === user?.id;
+  });
   const totalHosted = hostedRooms.length;
   const avgDuration = totalHosted > 0 
     ? Math.round(hostedRooms.reduce((acc, curr) => acc + Number(curr.duration || 0), 0) / totalHosted)
@@ -149,6 +152,24 @@ export default function Dashboard() {
     fetchPastSessions();
   }, []);
 
+  const [deleteConfirm, setDeleteConfirm] = useState(null); // roomId to delete
+  const [deleteLoading, setDeleteLoading] = useState(false);
+
+  const handleDeleteRoom = async () => {
+    if (!deleteConfirm) return;
+    setDeleteLoading(true);
+    try {
+      await apiFetch(`/rooms/${deleteConfirm}`, { method: 'DELETE' });
+      setPastRooms(prev => prev.filter(r => r.roomId !== deleteConfirm));
+      setDeleteConfirm(null);
+    } catch (err) {
+      setAlertModal({ title: 'Delete Failed', message: err.message });
+      setDeleteConfirm(null);
+    } finally {
+      setDeleteLoading(false);
+    }
+  };
+
   const handleAddCustomQuestion = () => {
     if (!customTitle.trim() || !customDesc.trim()) {
       setAlertModal({
@@ -172,17 +193,8 @@ export default function Dashboard() {
     try {
       const finalQuestions = [...selectedQuestions];
       
-      // Fallback: If they haven't explicitly clicked "+ Add", add their currently active input/selection
       if (finalQuestions.length === 0) {
-        if (activeTab === 'bank' && selectedProblem) {
-          finalQuestions.push({
-            problemSource: 'bank',
-            problemId: selectedProblem._id,
-            title: selectedProblem.title,
-            topic: selectedProblem.topic,
-            difficulty: selectedProblem.difficulty
-          });
-        } else if (activeTab === 'custom' && customTitle && customDesc) {
+        if (activeTab === 'custom' && customTitle && customDesc) {
           finalQuestions.push({
             problemSource: 'custom',
             customProblem: { title: customTitle, description: customDesc },
@@ -406,7 +418,6 @@ export default function Dashboard() {
                 <button
                   onClick={() => {
                     setSelectedQuestions([]);
-                    setSelectedProblem(null);
                     setCustomTitle('');
                     setCustomDesc('');
                     setShowCreateModal(true);
@@ -490,51 +501,67 @@ export default function Dashboard() {
               ) : (
                 <div className="space-y-3">
                   {pastRooms.map(r => {
-                    const isInterviewer = (r.interviewerId?._id || r.interviewerId) === user?.id;
+                    const isInterviewer = (r.interviewerId?._id || r.interviewerId)?.toString() === user?.id;
                     const isOngoing = r.status !== 'ended';
                     return (
                       <div 
-                        key={r._id} 
-                        onClick={() => navigate(isOngoing ? `/room/${r.roomId}` : `/report/${r.roomId}`)}
-                        className={`border p-3 rounded flex flex-col gap-1 transition duration-150 cursor-pointer shadow-sm ${
+                        key={r._id}
+                        className={`border p-3 rounded flex flex-col gap-1 transition duration-150 shadow-sm relative group ${
                           isOngoing 
-                            ? 'bg-green-50/40 border-green-200 hover:bg-green-50 hover:border-green-300' 
-                            : 'bg-gray-50 border-gray-200 hover:bg-orange-50 hover:border-orange-200'
+                            ? 'bg-green-50/40 border-green-200' 
+                            : 'bg-gray-50 border-gray-200'
                         }`}
                       >
-                        <div className="flex justify-between items-start">
-                          <span className="font-medium text-sm text-gray-800 flex items-center gap-1.5">
-                            {r.problemSource === 'bank' ? r.problemId?.title : r.customProblem?.title}
-                            {isOngoing && (
-                              <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[9px] font-bold bg-green-100 text-green-800 border border-green-200 animate-pulse">
-                                Live
-                              </span>
-                            )}
-                          </span>
-                          <span className="text-xs text-gray-500">
-                            {isOngoing ? 'Ongoing' : new Date(r.createdAt).toLocaleDateString()}
-                          </span>
-                        </div>
-                        <div className="flex justify-between items-center mt-1">
-                          <div className="flex items-center gap-2">
-                            <span className={`text-[10px] font-bold px-2 py-0.5 rounded uppercase tracking-wider ${isInterviewer ? 'bg-blue-50 text-blue-700 border border-blue-100' : 'bg-purple-50 text-purple-700 border border-purple-100'}`}>
-                              {isInterviewer ? 'Interviewer' : 'Candidate'}
+                        {/* Delete button — only for ended interviewer sessions */}
+                        {isInterviewer && !isOngoing && (
+                          <button
+                            onClick={(e) => { e.stopPropagation(); setDeleteConfirm(r.roomId); }}
+                            className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 w-6 h-6 rounded-full bg-red-50 border border-red-200 text-red-500 hover:bg-red-100 flex items-center justify-center transition-all cursor-pointer"
+                            title="Delete session"
+                          >
+                            <X size={12} />
+                          </button>
+                        )}
+                        <div
+                          onClick={() => navigate(isOngoing ? `/room/${r.roomId}` : `/report/${r.roomId}`)}
+                          className="cursor-pointer"
+                        >
+                          <div className="flex justify-between items-start">
+                            <span className="font-medium text-sm text-gray-800 flex items-center gap-1.5 pr-6">
+                              {r.selectedQuestions && r.selectedQuestions.length > 1
+                                ? `${r.selectedQuestions[0]?.problemId?.title || r.selectedQuestions[0]?.customProblem?.title || 'Untitled'} +${r.selectedQuestions.length - 1} more`
+                                : (r.problemSource === 'bank' ? r.problemId?.title : r.customProblem?.title)}
+                              {isOngoing && (
+                                <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[9px] font-bold bg-green-100 text-green-800 border border-green-200 animate-pulse">
+                                  Live
+                                </span>
+                              )}
                             </span>
-                            <span className="text-xs text-gray-500 font-medium">
-                              {isInterviewer 
-                                ? `Candidate: ${r.candidateId?.name || 'Waiting to join...'}` 
-                                : `Interviewer: ${r.interviewerId?.name || 'Unknown'}`}
+                            <span className="text-xs text-gray-500 shrink-0">
+                              {isOngoing ? 'Ongoing' : new Date(r.createdAt).toLocaleDateString()}
                             </span>
                           </div>
-                          <span className="text-xs text-gray-500">
-                            {isOngoing ? (
-                              <span className="text-green-700 font-semibold flex items-center gap-0.5">
-                                Rejoin Room →
+                          <div className="flex justify-between items-center mt-1">
+                            <div className="flex items-center gap-2">
+                              <span className={`text-[10px] font-bold px-2 py-0.5 rounded uppercase tracking-wider ${isInterviewer ? 'bg-blue-50 text-blue-700 border border-blue-100' : 'bg-purple-50 text-purple-700 border border-purple-100'}`}>
+                                {isInterviewer ? 'Interviewer' : 'Candidate'}
                               </span>
-                            ) : (
-                              `${r.duration} min`
-                            )}
-                          </span>
+                              <span className="text-xs text-gray-500 font-medium">
+                                {isInterviewer 
+                                  ? `Candidate: ${r.candidateId?.name || 'Waiting to join...'}` 
+                                  : `Interviewer: ${r.interviewerId?.name || 'Unknown'}`}
+                              </span>
+                            </div>
+                            <span className="text-xs text-gray-500">
+                              {isOngoing ? (
+                                <span className="text-green-700 font-semibold flex items-center gap-0.5">
+                                  Rejoin Room →
+                                </span>
+                              ) : (
+                                `${r.duration} min`
+                              )}
+                            </span>
+                          </div>
                         </div>
                       </div>
                     )
@@ -566,6 +593,43 @@ export default function Dashboard() {
                   className="px-5 py-2 bg-orange-500 hover:bg-orange-600 active:bg-orange-700 text-white font-semibold text-sm rounded-xl transition duration-150 shadow-sm cursor-pointer"
                 >
                   Okay
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Delete Session Confirm Modal */}
+      {deleteConfirm && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-xs flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl shadow-xl border border-gray-100 max-w-sm w-full overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+            <div className="h-1.5 w-full bg-gradient-to-r from-red-500 to-red-600" />
+            <div className="p-6">
+              <div className="flex items-center gap-3 mb-3">
+                <div className="w-10 h-10 rounded-full bg-red-50 text-red-500 flex items-center justify-center border border-red-100 shrink-0">
+                  <AlertCircle size={20} />
+                </div>
+                <h3 className="text-lg font-bold text-gray-950">Delete Session?</h3>
+              </div>
+              <p className="text-sm text-gray-600 leading-relaxed mb-6">
+                This will permanently delete this session and all associated data including the feedback report. This cannot be undone.
+              </p>
+              <div className="flex gap-3 justify-end">
+                <button
+                  onClick={() => setDeleteConfirm(null)}
+                  disabled={deleteLoading}
+                  className="px-4 py-2 bg-white border border-gray-300 text-gray-700 font-semibold text-sm rounded-xl hover:bg-gray-50 transition cursor-pointer"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleDeleteRoom}
+                  disabled={deleteLoading}
+                  className="px-4 py-2 bg-red-500 hover:bg-red-600 disabled:bg-gray-400 text-white font-semibold text-sm rounded-xl transition cursor-pointer flex items-center gap-2"
+                >
+                  {deleteLoading && <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />}
+                  Delete
                 </button>
               </div>
             </div>
@@ -664,8 +728,24 @@ export default function Dashboard() {
                           return (
                             <div 
                               key={p._id} 
-                              onClick={() => setSelectedProblem(p)}
-                              className={`p-3 border-b border-gray-100 cursor-pointer hover:bg-orange-50/50 transition-colors flex justify-between items-center ${selectedProblem?._id === p._id ? 'bg-orange-50 border-l-4 border-l-orange-500 font-semibold' : ''}`}
+                              onClick={() => {
+                                if (isAdded) {
+                                  setSelectedQuestions(prev => prev.filter(q => !(q.problemSource === 'bank' && q.problemId === p._id)));
+                                } else {
+                                  setSelectedQuestions(prev => [...prev, {
+                                    problemSource: 'bank',
+                                    problemId: p._id,
+                                    title: p.title,
+                                    topic: p.topic,
+                                    difficulty: p.difficulty
+                                  }]);
+                                }
+                              }}
+                              className={`p-3 border-b border-gray-100 cursor-pointer transition-colors flex items-center gap-3 ${
+                                isAdded 
+                                  ? 'bg-green-50 border-l-4 border-l-green-500' 
+                                  : 'hover:bg-orange-50/50'
+                              }`}
                             >
                               <div className="flex-1">
                                 <div className="font-semibold text-sm text-gray-800">{p.title}</div>
@@ -674,30 +754,11 @@ export default function Dashboard() {
                                   <span className={`text-[10px] px-2 py-0.5 rounded font-bold uppercase tracking-wider ${p.difficulty==='Easy'?'bg-green-100 text-green-700':p.difficulty==='Medium'?'bg-yellow-100 text-yellow-700':'bg-red-100 text-red-700'}`}>{p.difficulty}</span>
                                 </div>
                               </div>
-                              <button
-                                type="button"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  if (isAdded) {
-                                    setSelectedQuestions(prev => prev.filter(q => !(q.problemSource === 'bank' && q.problemId === p._id)));
-                                  } else {
-                                    setSelectedQuestions(prev => [...prev, {
-                                      problemSource: 'bank',
-                                      problemId: p._id,
-                                      title: p.title,
-                                      topic: p.topic,
-                                      difficulty: p.difficulty
-                                    }]);
-                                  }
-                                }}
-                                className={`ml-4 px-2.5 py-1 text-xs font-semibold rounded-lg border transition-all cursor-pointer ${
-                                  isAdded 
-                                    ? 'bg-green-50 border-green-200 text-green-600 hover:bg-green-100 hover:text-green-700 font-bold' 
-                                    : 'bg-orange-500 border-transparent text-white hover:bg-orange-600'
-                                }`}
-                              >
-                                {isAdded ? 'Added' : '+ Add'}
-                              </button>
+                              {isAdded && (
+                                <div className="w-6 h-6 rounded-full bg-green-100 border border-green-300 flex items-center justify-center shrink-0">
+                                  <Check size={14} className="text-green-600" />
+                                </div>
+                              )}
                             </div>
                           );
                         })}

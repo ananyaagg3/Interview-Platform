@@ -278,6 +278,7 @@ export default function Room() {
     return peer;
   }, [destroyPeer, roomId]);
 
+  // Preview screen: request camera with mic volume analyser
   useEffect(() => {
     if (hasJoined) return;
 
@@ -332,6 +333,28 @@ export default function Room() {
     };
   }, [hasJoined]);
 
+  // Refresh/rejoin case: hasJoined is restored from localStorage as true,
+  // but the camera stream was lost — request it again silently.
+  useEffect(() => {
+    if (!hasJoined) return; // handled by preview effect above
+    if (localStreamRef.current) return; // already have a stream
+
+    const getMediaForRejoin = async () => {
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+        setLocalStream(stream);
+        setPermissionGranted(true);
+        console.log('[Refresh] Camera/mic re-acquired after page refresh');
+      } catch (err) {
+        console.warn('[Refresh] Could not re-acquire camera/mic after refresh:', err);
+        // Still allow the room to work without video — audio-only or view-only
+        setPermissionGranted(false);
+      }
+    };
+
+    getMediaForRejoin();
+  }, [hasJoined]);
+
   const localVideoRef = useCallback((node) => {
     if (node && localStream) {
       node.srcObject = localStream;
@@ -361,6 +384,20 @@ export default function Room() {
   useEffect(() => {
     isMutedRef.current = isMuted;
   }, [isMuted]);
+  // Persist room state to localStorage so refreshing the page restores it
+  const persistRoomState = useCallback((updates) => {
+    try {
+      const existing = (() => {
+        try { return JSON.parse(localStorage.getItem(ROOM_STATE_KEY(roomId)) || '{}'); } catch { return {}; }
+      })();
+      localStorage.setItem(ROOM_STATE_KEY(roomId), JSON.stringify({ ...existing, ...updates }));
+    } catch { /* ignore quota errors */ }
+  }, [roomId]);
+
+  // Clear persisted room state (on leave or session end)
+  const clearRoomState = useCallback(() => {
+    try { localStorage.removeItem(ROOM_STATE_KEY(roomId)); } catch { /* ignore */ }
+  }, [roomId]);
 
   useEffect(() => {
     if (!room || !hasJoined || !turnLoaded) return;
@@ -593,21 +630,6 @@ export default function Room() {
     };
   }, [destroyPeer]);
 
-  // Persist room state to localStorage so refreshing the page restores it
-  const persistRoomState = useCallback((updates) => {
-    try {
-      const existing = (() => {
-        try { return JSON.parse(localStorage.getItem(ROOM_STATE_KEY(roomId)) || '{}'); } catch { return {}; }
-      })();
-      localStorage.setItem(ROOM_STATE_KEY(roomId), JSON.stringify({ ...existing, ...updates }));
-    } catch { /* ignore quota errors */ }
-  }, [roomId]);
-
-  // Clear persisted room state (on leave or session end)
-  const clearRoomState = useCallback(() => {
-    try { localStorage.removeItem(ROOM_STATE_KEY(roomId)); } catch { /* ignore */ }
-  }, [roomId]);
-
   const handleEditorChange = useCallback((value) => {
     if (isRemoteChange.current) {
       isRemoteChange.current = false;
@@ -811,12 +833,20 @@ export default function Room() {
               </button>
 
               {!permissionGranted && permissionError && (
-                <button
-                  onClick={() => window.location.reload()}
-                  className="w-full py-2.5 bg-white border border-gray-300 text-gray-700 font-semibold text-xs rounded-xl hover:bg-gray-50 active:bg-gray-100 transition cursor-pointer"
-                >
-                  Retry Permissions
-                </button>
+                <>
+                  <button
+                    onClick={() => { setHasJoined(true); persistRoomState({ hasJoined: true }); }}
+                    className="w-full py-2.5 bg-orange-50 border border-orange-200 text-orange-700 font-semibold text-xs rounded-xl hover:bg-orange-100 active:bg-orange-200 transition cursor-pointer"
+                  >
+                    Join without Camera
+                  </button>
+                  <button
+                    onClick={() => window.location.reload()}
+                    className="w-full py-2.5 bg-white border border-gray-300 text-gray-700 font-semibold text-xs rounded-xl hover:bg-gray-50 active:bg-gray-100 transition cursor-pointer"
+                  >
+                    Retry Permissions
+                  </button>
+                </>
               )}
             </div>
           </div>
