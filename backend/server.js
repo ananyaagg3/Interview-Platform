@@ -15,36 +15,37 @@ dotenv.config();
 const app = express();
 const server = http.createServer(app);
 
-// Allow any localhost Vite port (5173-5180) in dev, or FRONTEND_URL in production
+// Robust CORS — allows localhost, Vercel, Railway, and any custom FRONTEND_URL
 const allowedOrigin = (origin, callback) => {
-  if (!origin) return callback(null, true); // allow non-browser requests (curl, etc.)
-  
-  const normalizedOrigin = origin.replace(/\/$/, '');
-  
-  let targetFrontend = null;
+  if (!origin) return callback(null, true); // non-browser requests (curl, Postman)
+
+  const o = origin.replace(/\/$/, '');
+
+  // Always allow localhost (any port)
+  if (/^http:\/\/localhost(:\d+)?$/.test(o)) return callback(null, true);
+
+  // Always allow Vercel preview/production domains
+  if (/\.vercel\.app$/.test(o)) return callback(null, true);
+
+  // Always allow Railway domains
+  if (/\.railway\.app$/.test(o)) return callback(null, true);
+
+  // Allow custom domain from FRONTEND_URL (e.g., whatisrecent.com)
   if (process.env.FRONTEND_URL) {
     try {
-      targetFrontend = new URL(process.env.FRONTEND_URL).origin;
-    } catch (e) {
-      targetFrontend = process.env.FRONTEND_URL.replace(/\/$/, '');
-    }
+      const target = new URL(process.env.FRONTEND_URL).origin;
+      if (o === target) return callback(null, true);
+    } catch { /* ignore bad URL */ }
   }
 
-  console.log(`[CORS Request] Origin: "${origin}" (Normalized: "${normalizedOrigin}"), Expected FRONTEND_URL: "${process.env.FRONTEND_URL}" (Normalized: "${targetFrontend}")`);
-
-  if (targetFrontend && normalizedOrigin === targetFrontend) {
-    return callback(null, true);
-  }
-  // Allow any localhost port in the Vite range
-  if (/^http:\/\/localhost:(517[3-9]|518[0-9])$/.test(normalizedOrigin)) {
-    return callback(null, true);
-  }
-  console.warn(`[CORS Blocked] Origin "${origin}" does not match FRONTEND_URL or localhost`);
+  console.warn(`[CORS Blocked] Origin "${origin}" not in allowlist`);
   callback(new Error(`CORS: origin ${origin} not allowed`));
 };
 
+const corsConfig = { origin: allowedOrigin, methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'], credentials: true };
+
 // CORS configuration for Express
-app.use(cors({ origin: allowedOrigin, methods: ['GET', 'POST', 'PUT', 'DELETE'], credentials: true }));
+app.use(cors(corsConfig));
 
 // Parse JSON bodies — increase limit to handle base64 whiteboard snapshots
 app.use(express.json({ limit: '10mb' }));
@@ -52,7 +53,7 @@ app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
 // Configure Socket.IO
 const io = new Server(server, {
-  cors: { origin: allowedOrigin, methods: ['GET', 'POST', 'PUT', 'DELETE'], credentials: true },
+  cors: corsConfig,
   maxHttpBufferSize: 10 * 1024 * 1024 // 10MB — needed for whiteboard snapshot base64
 });
 
