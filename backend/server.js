@@ -77,6 +77,12 @@ app.get('/api/debug', async (req, res) => {
   }
 });
 
+// POST debug — test if POST body parsing works
+app.post('/api/debug-post', (req, res) => {
+  console.log('[debug-post] Body received:', JSON.stringify(req.body));
+  res.json({ received: true, body: req.body, timestamp: new Date().toISOString() });
+});
+
 // Database connection
 const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/interview-platform';
 mongoose.connect(MONGODB_URI)
