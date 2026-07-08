@@ -66,6 +66,17 @@ app.use('/api/rooms', roomRoutes);
 // Health check — used by Railway to confirm service is up
 app.get('/api/health', (req, res) => res.json({ status: 'ok', timestamp: new Date().toISOString() }));
 
+// Debug endpoint — test if bcryptjs works
+app.get('/api/debug', async (req, res) => {
+  try {
+    const bcrypt = await import('bcryptjs');
+    const hash = await bcrypt.default.hash('test', 10);
+    res.json({ bcrypt: 'bcryptjs', hashWorks: true, hash: hash.substring(0, 10) + '...' });
+  } catch (err) {
+    res.json({ bcrypt: 'error', message: err.message });
+  }
+});
+
 // Database connection
 const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/interview-platform';
 mongoose.connect(MONGODB_URI)
