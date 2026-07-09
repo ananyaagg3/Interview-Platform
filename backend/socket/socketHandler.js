@@ -43,7 +43,6 @@ export default function setupSocket(io) {
       userName,
       muted
     });
-
     socket.on('join-room', async ({ roomId, userId, userName }) => {
       try {
         console.log(`[room:${roomId}] join-room from socket=${socket.id} user=${userId} name=${userName}`);
@@ -52,6 +51,15 @@ export default function setupSocket(io) {
           socket.emit('error', 'Room not found');
           return;
         }
+
+        console.log(`[room:${roomId}] join-room role check details:`, {
+          interviewerIdStr: room.interviewerId?.toString(),
+          candidateIdStr: room.candidateId?.toString(),
+          userId,
+          isInterviewerMatch: room.interviewerId?.toString() === userId,
+          isCandidateMatch: room.candidateId?.toString() === userId,
+          candidateEmpty: !room.candidateId
+        });
 
         let role = '';
         if (room.interviewerId.toString() === userId) {

@@ -10,7 +10,7 @@ import Markdown from '../components/Markdown';
 import { Video, VideoOff, Mic, MicOff, AlertCircle, Play, Sparkles, X } from 'lucide-react';
 
 // ─── localStorage helpers for room state persistence ───────────────────────
-const ROOM_STATE_KEY = (id) => `room_state_${id}`;
+const ROOM_STATE_KEY = (roomId, userId) => `room_state_${roomId}_${userId || 'anon'}`;
 
 export default function Room() {
   const { roomId } = useParams();
@@ -20,7 +20,7 @@ export default function Room() {
   // Restore persisted state from localStorage on first render
   const getPersistedRoomState = () => {
     try {
-      const raw = localStorage.getItem(ROOM_STATE_KEY(roomId));
+      const raw = localStorage.getItem(ROOM_STATE_KEY(roomId, user?.id));
       if (raw) return JSON.parse(raw);
     } catch { /* ignore */ }
     return null;
@@ -443,16 +443,16 @@ export default function Room() {
   const persistRoomState = useCallback((updates) => {
     try {
       const existing = (() => {
-        try { return JSON.parse(localStorage.getItem(ROOM_STATE_KEY(roomId)) || '{}'); } catch { return {}; }
+        try { return JSON.parse(localStorage.getItem(ROOM_STATE_KEY(roomId, user?.id)) || '{}'); } catch { return {}; }
       })();
-      localStorage.setItem(ROOM_STATE_KEY(roomId), JSON.stringify({ ...existing, ...updates }));
+      localStorage.setItem(ROOM_STATE_KEY(roomId, user?.id), JSON.stringify({ ...existing, ...updates }));
     } catch { /* ignore quota errors */ }
-  }, [roomId]);
+  }, [roomId, user?.id]);
 
   // Clear persisted room state (on leave or session end)
   const clearRoomState = useCallback(() => {
-    try { localStorage.removeItem(ROOM_STATE_KEY(roomId)); } catch { /* ignore */ }
-  }, [roomId]);
+    try { localStorage.removeItem(ROOM_STATE_KEY(roomId, user?.id)); } catch { /* ignore */ }
+  }, [roomId, user?.id]);
 
   useEffect(() => {
     if (!room || !hasJoined || !turnLoaded) return;
@@ -712,6 +712,7 @@ export default function Room() {
 
   // Handle browser back-button / page close without going through End Session.
   // Gracefully disconnect the socket so the server emits `peer-left` immediately.
+  // Also detect back-forward cache (bfcache) pageshow and force reload to start clean.
   useEffect(() => {
     if (!hasJoined) return;
 
@@ -724,13 +725,21 @@ export default function Room() {
       }
     };
 
+    const handlePageShow = (e) => {
+      if (e.persisted) {
+        console.log('[Bfcache] Page restored from back-forward cache, reloading for clean state...');
+        window.location.reload();
+      }
+    };
+
     window.addEventListener('beforeunload', handleBeforeUnload);
-    // pagehide fires on mobile / bfcache scenarios
     window.addEventListener('pagehide', handleBeforeUnload);
+    window.addEventListener('pageshow', handlePageShow);
 
     return () => {
       window.removeEventListener('beforeunload', handleBeforeUnload);
       window.removeEventListener('pagehide', handleBeforeUnload);
+      window.removeEventListener('pageshow', handlePageShow);
     };
   }, [hasJoined]);
 
