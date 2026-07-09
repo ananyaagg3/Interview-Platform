@@ -3,6 +3,8 @@ import Room from '../models/Room.js';
 const activeRooms = new Map();
 const whiteboardEvents = new Map();
 const roomMicStates = new Map();
+// roomId -> Map<userId, socketId>  — tracks which socket belongs to each user per room
+const roomUserSockets = new Map();
 let ioInstance = null;
 
 export const getIo = () => ioInstance;
@@ -65,6 +67,31 @@ export default function setupSocket(io) {
           socket.emit('error', 'Room is full');
           return;
         }
+
+        // ── Evict stale socket for this userId if they rejoined with a new socket ──
+        if (!roomUserSockets.has(roomId)) {
+          roomUserSockets.set(roomId, new Map());
+        }
+        const roomUsers = roomUserSockets.get(roomId);
+        const existingSocketId = roomUsers.get(userId);
+        if (existingSocketId && existingSocketId !== socket.id) {
+          // The same user is rejoining with a fresh socket (back-button / refresh).
+          // Notify all other peers that the OLD socket has left so they tear down
+          // their WebRTC connection cleanly before the new one is established.
+          console.log(`[room:${roomId}] Evicting stale socket ${existingSocketId} for user ${userId}`);
+          socket.to(roomId).emit('peer-left', {
+            socketId: existingSocketId,
+            userId,
+            userName
+          });
+          // Also force-leave the old socket from the room if it somehow still exists
+          const staleSocket = io.sockets.sockets.get(existingSocketId);
+          if (staleSocket) {
+            staleSocket.leave(roomId);
+            staleSocket.data.roomId = null;
+          }
+        }
+        roomUsers.set(userId, socket.id);
 
         socket.data.roomId = roomId;
         socket.data.userId = userId;
@@ -262,6 +289,7 @@ export default function setupSocket(io) {
           activeRooms.delete(roomId);
           whiteboardEvents.delete(roomId);
           roomMicStates.delete(roomId);
+          roomUserSockets.delete(roomId);
           io.to(roomId).emit('session-ended');
 
           import('../controllers/roomController.js').then(({ generateFeedbackReport }) => {
@@ -275,11 +303,19 @@ export default function setupSocket(io) {
 
     socket.on('disconnect', () => {
       console.log(`Socket disconnected: ${socket.id}`);
-      if (socket.data.roomId) {
-        socket.to(socket.data.roomId).emit('peer-left', {
+      const { roomId, userId, userName } = socket.data;
+      if (roomId) {
+        // Clean up userId→socketId tracking only if this socket is still the
+        // registered one (a rejoin may have already replaced it)
+        const roomUsers = roomUserSockets.get(roomId);
+        if (roomUsers && roomUsers.get(userId) === socket.id) {
+          roomUsers.delete(userId);
+          if (roomUsers.size === 0) roomUserSockets.delete(roomId);
+        }
+        socket.to(roomId).emit('peer-left', {
           socketId: socket.id,
-          userId: socket.data.userId,
-          userName: socket.data.userName
+          userId,
+          userName
         });
       }
     });

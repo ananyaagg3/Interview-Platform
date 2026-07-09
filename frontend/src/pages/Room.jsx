@@ -94,6 +94,12 @@ export default function Room() {
   const pendingSignalsRef = useRef([]);
   const reconnectTimerRef = useRef(null);
   const whiteboardCanvasRef = useRef(null);
+  // DOM refs for video elements — avoids stale srcObject on re-render
+  const localVideoDomRef = useRef(null);
+  const remoteVideoDomRef = useRef(null);
+  // Flag: when hasJoined is restored from localStorage but stream wasn't ready yet,
+  // we set this so WebRTC is initiated once the stream arrives
+  const pendingRejoinPeerRef = useRef(false);
 
   const setRemoteParticipant = useCallback(({ socketId = null, userId = null, userName = '' } = {}) => {
     remoteParticipantRef.current = { socketId, userId };
@@ -339,6 +345,9 @@ export default function Room() {
     if (!hasJoined) return; // handled by preview effect above
     if (localStreamRef.current) return; // already have a stream
 
+    // Mark that we need to initiate the peer connection once the stream is ready
+    pendingRejoinPeerRef.current = true;
+
     const getMediaForRejoin = async () => {
       try {
         const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
@@ -347,6 +356,7 @@ export default function Room() {
         console.log('[Refresh] Camera/mic re-acquired after page refresh');
       } catch (err) {
         console.warn('[Refresh] Could not re-acquire camera/mic after refresh:', err);
+        pendingRejoinPeerRef.current = false;
         // Still allow the room to work without video — audio-only or view-only
         setPermissionGranted(false);
       }
@@ -355,27 +365,62 @@ export default function Room() {
     getMediaForRejoin();
   }, [hasJoined]);
 
+  // Stable DOM ref callbacks — the actual stream assignment is done via useEffect below
   const localVideoRef = useCallback((node) => {
+    localVideoDomRef.current = node;
     if (node && localStream) {
       node.srcObject = localStream;
-      node.play().catch(err => {
-        console.error('Local video playback failed:', err);
-      });
+      node.play().catch(() => {});
+    }
+  }, [localStream]);
+
+  const remoteVideoRef = useCallback((node) => {
+    remoteVideoDomRef.current = node;
+    if (node && remoteStream) {
+      node.srcObject = remoteStream;
+      node.play().catch(() => {});
+    }
+  }, [remoteStream]);
+
+  // Keep video srcObject in sync whenever streams change (handles cases where DOM node
+  // persists across renders but the stream object itself is replaced)
+  useEffect(() => {
+    const node = localVideoDomRef.current;
+    if (!node) return;
+    if (localStream && !isCameraOff) {
+      if (node.srcObject !== localStream) {
+        node.srcObject = localStream;
+        node.play().catch(() => {});
+      }
+    } else {
+      node.srcObject = null;
     }
   }, [localStream, isCameraOff]);
 
-  const remoteVideoRef = useCallback((node) => {
-    if (node && remoteStream) {
-      node.srcObject = remoteStream;
-      node.play().catch(err => {
-        console.error('Remote video playback failed:', err);
-      });
+  useEffect(() => {
+    const node = remoteVideoDomRef.current;
+    if (!node) return;
+    if (remoteStream) {
+      if (node.srcObject !== remoteStream) {
+        node.srcObject = remoteStream;
+        node.play().catch(() => {});
+      }
+    } else {
+      node.srcObject = null;
     }
   }, [remoteStream]);
 
   useEffect(() => {
     localStreamRef.current = localStream;
-  }, [localStream]);
+    // If we were waiting for a stream (back-button rejoin) and the socket is
+    // already connected, re-emit join-room so the server re-advertises us
+    // and triggers the peer-joined / existing-peers flow.
+    if (localStream && pendingRejoinPeerRef.current && socket.connected) {
+      pendingRejoinPeerRef.current = false;
+      console.log('[Refresh] Stream ready — re-emitting join-room for peer renegotiation');
+      socket.emit('join-room', { roomId, userId: user?.id, userName: user?.name });
+    }
+  }, [localStream, roomId, user]);
 
   useEffect(() => {
     iceServersRef.current = iceServers;
@@ -467,6 +512,11 @@ export default function Room() {
       setRemoteParticipant({ socketId: peer.socketId, userId: peer.userId, userName: peer.userName || 'Peer' });
       console.log('[RemoteMic] Remote React state updated from existing peer', { micMuted: Boolean(peer.micMuted) });
       setIsRemoteMuted(Boolean(peer.micMuted));
+      // Clear any pending signals from a previous connection cycle
+      pendingSignalsRef.current = [];
+      setVideoStatus('reconnecting');
+      // Do NOT initiate here — the existing peer (who receives peer-joined) will
+      // call initiatePeer(true, ...) which sends an offer. We act as the answerer.
     };
 
     const onPeerJoined = ({ socketId, userId, userName: peerName, micMuted }) => {
@@ -568,9 +618,13 @@ export default function Room() {
     };
 
     const onConnect = () => {
-      console.log('[Socket] connected');
+      console.log('[Socket] connected / reconnected');
       setDisconnected(false);
       joinRoom();
+      // Re-broadcast mic state after reconnection so remote sees correct status
+      if (isMutedRef.current) {
+        socket.emit('participant-mic-muted', { roomId });
+      }
     };
 
     socket.on('room-state', onRoomState);
@@ -612,7 +666,9 @@ export default function Room() {
       socket.off('disconnect', onDisconnect);
       socket.off('connect', onConnect);
       destroyPeer('room component cleanup');
-      socket.disconnect();
+      // NOTE: Do NOT call socket.disconnect() here — the socket is a module-level
+      // singleton. Disconnecting it prevents reconnection on back-button rejoin.
+      // The socket will naturally disconnect/reconnect through its own lifecycle.
     };
   }, [roomId, hasJoined, turnLoaded, initiatePeer, destroyPeer, setRemoteParticipant, navigate, syncLocalMicState, user.id, user.name, persistRoomState, clearRoomState]);
 
@@ -621,14 +677,40 @@ export default function Room() {
     syncLocalMicState(isMuted);
   }, [hasJoined, isMuted, syncLocalMicState]);
 
+  // Stop media tracks and destroy WebRTC on unmount
   useEffect(() => {
     return () => {
       if (localStreamRef.current) {
         localStreamRef.current.getTracks().forEach(t => t.stop());
+        localStreamRef.current = null;
       }
       destroyPeer('component unmounted');
     };
   }, [destroyPeer]);
+
+  // Handle browser back-button / page close without going through End Session.
+  // Gracefully disconnect the socket so the server emits `peer-left` immediately.
+  useEffect(() => {
+    if (!hasJoined) return;
+
+    const handleBeforeUnload = () => {
+      // Use sendBeacon-compatible disconnect: tell socket to disconnect immediately
+      // so the server's disconnect handler fires fast instead of waiting for the
+      // socket timeout (which causes the stale-peer glitch on rejoin).
+      if (socket.connected) {
+        socket.disconnect();
+      }
+    };
+
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    // pagehide fires on mobile / bfcache scenarios
+    window.addEventListener('pagehide', handleBeforeUnload);
+
+    return () => {
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+      window.removeEventListener('pagehide', handleBeforeUnload);
+    };
+  }, [hasJoined]);
 
   const handleEditorChange = useCallback((value) => {
     if (isRemoteChange.current) {
