@@ -28,7 +28,7 @@ export default function Room() {
   const persisted = getPersistedRoomState();
 
   const [room, setRoom] = useState(null);
-  const [role, setRole] = useState('');
+  const [role, setRole] = useState(persisted?.role || '');
   const [status, setStatus] = useState('waiting');
   const [code, setCode] = useState(persisted?.code || '');
   const [language, setLanguage] = useState(persisted?.language || 'javascript');
@@ -97,9 +97,6 @@ export default function Room() {
   // DOM refs for video elements — avoids stale srcObject on re-render
   const localVideoDomRef = useRef(null);
   const remoteVideoDomRef = useRef(null);
-  // Flag: when hasJoined is restored from localStorage but stream wasn't ready yet,
-  // we set this so WebRTC is initiated once the stream arrives
-  const pendingRejoinPeerRef = useRef(false);
 
   const setRemoteParticipant = useCallback(({ socketId = null, userId = null, userName = '' } = {}) => {
     remoteParticipantRef.current = { socketId, userId };
@@ -345,9 +342,6 @@ export default function Room() {
     if (!hasJoined) return; // handled by preview effect above
     if (localStreamRef.current) return; // already have a stream
 
-    // Mark that we need to initiate the peer connection once the stream is ready
-    pendingRejoinPeerRef.current = true;
-
     const getMediaForRejoin = async () => {
       try {
         const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
@@ -356,8 +350,6 @@ export default function Room() {
         console.log('[Refresh] Camera/mic re-acquired after page refresh');
       } catch (err) {
         console.warn('[Refresh] Could not re-acquire camera/mic after refresh:', err);
-        pendingRejoinPeerRef.current = false;
-        // Still allow the room to work without video — audio-only or view-only
         setPermissionGranted(false);
       }
     };
@@ -412,15 +404,33 @@ export default function Room() {
 
   useEffect(() => {
     localStreamRef.current = localStream;
-    // If we were waiting for a stream (back-button rejoin) and the socket is
-    // already connected, re-emit join-room so the server re-advertises us
-    // and triggers the peer-joined / existing-peers flow.
-    if (localStream && pendingRejoinPeerRef.current && socket.connected) {
-      pendingRejoinPeerRef.current = false;
-      console.log('[Refresh] Stream ready — re-emitting join-room for peer renegotiation');
-      socket.emit('join-room', { roomId, userId: user?.id, userName: user?.name });
+    // When the stream becomes available after a rejoin, we may have queued
+    // signals (including an offer) that arrived while we had no stream.
+    // Process them now.
+    if (!localStream) return;
+    if (peerRef.current && !peerRef.current.destroyed) return; // already connected
+
+    const queued = pendingSignalsRef.current;
+    const hasOffer = queued.some(s => s.type === 'offer');
+    const targetSocket = remoteSocketIdRef.current;
+
+    if (hasOffer && targetSocket) {
+      // Other side sent us an offer while we were acquiring media.
+      // Create peer as answerer and apply all queued signals.
+      console.log('[Refresh] Stream ready — applying queued offer from', targetSocket);
+      const peer = initiatePeer(false, targetSocket);
+      if (peer) {
+        const signals = queued.splice(0);
+        signals.forEach(s => {
+          try { peer.signal(s); } catch (e) { console.error('[WebRTC] Error applying queued signal:', e); }
+        });
+      }
+    } else if (targetSocket) {
+      // We know a remote peer but have no queued offer — initiate as caller.
+      console.log('[Refresh] Stream ready — initiating peer to known remote', targetSocket);
+      initiatePeer(true, targetSocket);
     }
-  }, [localStream, roomId, user]);
+  }, [localStream, initiatePeer]);
 
   useEffect(() => {
     iceServersRef.current = iceServers;
@@ -465,6 +475,7 @@ export default function Room() {
       }
       setStatus(state.status);
       setRole(state.role);
+      persistRoomState({ role: state.role });
       if (typeof state.isMicMuted === 'boolean') {
         setIsMuted(state.isMicMuted);
       }
@@ -547,6 +558,14 @@ export default function Room() {
           return;
         }
         setRemoteParticipant({ socketId: from, userId: payload.userId, userName: payload.userName });
+      }
+
+      // If local stream isn't ready yet (rejoin race), queue everything.
+      // The stream-arrival effect will create the peer and drain the queue.
+      if (!localStreamRef.current) {
+        console.log('[WebRTC] Stream not ready, queueing signal', { signalType });
+        pendingSignalsRef.current.push(signalData);
+        return;
       }
 
       let peer = peerRef.current;
@@ -666,9 +685,12 @@ export default function Room() {
       socket.off('disconnect', onDisconnect);
       socket.off('connect', onConnect);
       destroyPeer('room component cleanup');
-      // NOTE: Do NOT call socket.disconnect() here — the socket is a module-level
-      // singleton. Disconnecting it prevents reconnection on back-button rejoin.
-      // The socket will naturally disconnect/reconnect through its own lifecycle.
+      // Disconnect the socket so the server knows this user left the room.
+      // This is critical for SPA back-button navigation (beforeunload doesn't
+      // fire for in-app navigations). The socket is a singleton but calling
+      // disconnect() is safe — socket.connect() in the next mount reconnects
+      // it with a fresh socket ID.
+      socket.disconnect();
     };
   }, [roomId, hasJoined, turnLoaded, initiatePeer, destroyPeer, setRemoteParticipant, navigate, syncLocalMicState, user.id, user.name, persistRoomState, clearRoomState]);
 
