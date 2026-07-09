@@ -10,7 +10,7 @@ import Markdown from '../components/Markdown';
 import { Video, VideoOff, Mic, MicOff, AlertCircle, Play, Sparkles, X } from 'lucide-react';
 
 // ─── localStorage helpers for room state persistence ───────────────────────
-const ROOM_STATE_KEY = (roomId, userId) => `room_state_${roomId}_${userId || 'anon'}`;
+const ROOM_STATE_KEY = (id) => `room_state_${id}`;
 
 export default function Room() {
   const { roomId } = useParams();
@@ -20,7 +20,7 @@ export default function Room() {
   // Restore persisted state from localStorage on first render
   const getPersistedRoomState = () => {
     try {
-      const raw = localStorage.getItem(ROOM_STATE_KEY(roomId, user?.id));
+      const raw = localStorage.getItem(ROOM_STATE_KEY(roomId));
       if (raw) return JSON.parse(raw);
     } catch { /* ignore */ }
     return null;
@@ -28,7 +28,7 @@ export default function Room() {
   const persisted = getPersistedRoomState();
 
   const [room, setRoom] = useState(null);
-  const [role, setRole] = useState(persisted?.role || '');
+  const [role, setRole] = useState('');
   const [status, setStatus] = useState('waiting');
   const [code, setCode] = useState(persisted?.code || '');
   const [language, setLanguage] = useState(persisted?.language || 'javascript');
@@ -94,9 +94,6 @@ export default function Room() {
   const pendingSignalsRef = useRef([]);
   const reconnectTimerRef = useRef(null);
   const whiteboardCanvasRef = useRef(null);
-  // DOM refs for video elements — avoids stale srcObject on re-render
-  const localVideoDomRef = useRef(null);
-  const remoteVideoDomRef = useRef(null);
 
   const setRemoteParticipant = useCallback(({ socketId = null, userId = null, userName = '' } = {}) => {
     remoteParticipantRef.current = { socketId, userId };
@@ -350,6 +347,7 @@ export default function Room() {
         console.log('[Refresh] Camera/mic re-acquired after page refresh');
       } catch (err) {
         console.warn('[Refresh] Could not re-acquire camera/mic after refresh:', err);
+        // Still allow the room to work without video — audio-only or view-only
         setPermissionGranted(false);
       }
     };
@@ -357,80 +355,27 @@ export default function Room() {
     getMediaForRejoin();
   }, [hasJoined]);
 
-  // Stable DOM ref callbacks — the actual stream assignment is done via useEffect below
   const localVideoRef = useCallback((node) => {
-    localVideoDomRef.current = node;
     if (node && localStream) {
       node.srcObject = localStream;
-      node.play().catch(() => {});
-    }
-  }, [localStream]);
-
-  const remoteVideoRef = useCallback((node) => {
-    remoteVideoDomRef.current = node;
-    if (node && remoteStream) {
-      node.srcObject = remoteStream;
-      node.play().catch(() => {});
-    }
-  }, [remoteStream]);
-
-  // Keep video srcObject in sync whenever streams change (handles cases where DOM node
-  // persists across renders but the stream object itself is replaced)
-  useEffect(() => {
-    const node = localVideoDomRef.current;
-    if (!node) return;
-    if (localStream && !isCameraOff) {
-      if (node.srcObject !== localStream) {
-        node.srcObject = localStream;
-        node.play().catch(() => {});
-      }
-    } else {
-      node.srcObject = null;
+      node.play().catch(err => {
+        console.error('Local video playback failed:', err);
+      });
     }
   }, [localStream, isCameraOff]);
 
-  useEffect(() => {
-    const node = remoteVideoDomRef.current;
-    if (!node) return;
-    if (remoteStream) {
-      if (node.srcObject !== remoteStream) {
-        node.srcObject = remoteStream;
-        node.play().catch(() => {});
-      }
-    } else {
-      node.srcObject = null;
+  const remoteVideoRef = useCallback((node) => {
+    if (node && remoteStream) {
+      node.srcObject = remoteStream;
+      node.play().catch(err => {
+        console.error('Remote video playback failed:', err);
+      });
     }
   }, [remoteStream]);
 
   useEffect(() => {
     localStreamRef.current = localStream;
-    // When the stream becomes available after a rejoin, we may have queued
-    // signals (including an offer) that arrived while we had no stream.
-    // Process them now.
-    if (!localStream) return;
-    if (peerRef.current && !peerRef.current.destroyed) return; // already connected
-
-    const queued = pendingSignalsRef.current;
-    const hasOffer = queued.some(s => s.type === 'offer');
-    const targetSocket = remoteSocketIdRef.current;
-
-    if (hasOffer && targetSocket) {
-      // Other side sent us an offer while we were acquiring media.
-      // Create peer as answerer and apply all queued signals.
-      console.log('[Refresh] Stream ready — applying queued offer from', targetSocket);
-      const peer = initiatePeer(false, targetSocket);
-      if (peer) {
-        const signals = queued.splice(0);
-        signals.forEach(s => {
-          try { peer.signal(s); } catch (e) { console.error('[WebRTC] Error applying queued signal:', e); }
-        });
-      }
-    } else if (targetSocket) {
-      // We know a remote peer but have no queued offer — initiate as caller.
-      console.log('[Refresh] Stream ready — initiating peer to known remote', targetSocket);
-      initiatePeer(true, targetSocket);
-    }
-  }, [localStream, initiatePeer]);
+  }, [localStream]);
 
   useEffect(() => {
     iceServersRef.current = iceServers;
@@ -443,16 +388,16 @@ export default function Room() {
   const persistRoomState = useCallback((updates) => {
     try {
       const existing = (() => {
-        try { return JSON.parse(localStorage.getItem(ROOM_STATE_KEY(roomId, user?.id)) || '{}'); } catch { return {}; }
+        try { return JSON.parse(localStorage.getItem(ROOM_STATE_KEY(roomId)) || '{}'); } catch { return {}; }
       })();
-      localStorage.setItem(ROOM_STATE_KEY(roomId, user?.id), JSON.stringify({ ...existing, ...updates }));
+      localStorage.setItem(ROOM_STATE_KEY(roomId), JSON.stringify({ ...existing, ...updates }));
     } catch { /* ignore quota errors */ }
-  }, [roomId, user?.id]);
+  }, [roomId]);
 
   // Clear persisted room state (on leave or session end)
   const clearRoomState = useCallback(() => {
-    try { localStorage.removeItem(ROOM_STATE_KEY(roomId, user?.id)); } catch { /* ignore */ }
-  }, [roomId, user?.id]);
+    try { localStorage.removeItem(ROOM_STATE_KEY(roomId)); } catch { /* ignore */ }
+  }, [roomId]);
 
   useEffect(() => {
     if (!room || !hasJoined || !turnLoaded) return;
@@ -475,7 +420,6 @@ export default function Room() {
       }
       setStatus(state.status);
       setRole(state.role);
-      persistRoomState({ role: state.role });
       if (typeof state.isMicMuted === 'boolean') {
         setIsMuted(state.isMicMuted);
       }
@@ -523,11 +467,6 @@ export default function Room() {
       setRemoteParticipant({ socketId: peer.socketId, userId: peer.userId, userName: peer.userName || 'Peer' });
       console.log('[RemoteMic] Remote React state updated from existing peer', { micMuted: Boolean(peer.micMuted) });
       setIsRemoteMuted(Boolean(peer.micMuted));
-      // Clear any pending signals from a previous connection cycle
-      pendingSignalsRef.current = [];
-      setVideoStatus('reconnecting');
-      // Do NOT initiate here — the existing peer (who receives peer-joined) will
-      // call initiatePeer(true, ...) which sends an offer. We act as the answerer.
     };
 
     const onPeerJoined = ({ socketId, userId, userName: peerName, micMuted }) => {
@@ -558,14 +497,6 @@ export default function Room() {
           return;
         }
         setRemoteParticipant({ socketId: from, userId: payload.userId, userName: payload.userName });
-      }
-
-      // If local stream isn't ready yet (rejoin race), queue everything.
-      // The stream-arrival effect will create the peer and drain the queue.
-      if (!localStreamRef.current) {
-        console.log('[WebRTC] Stream not ready, queueing signal', { signalType });
-        pendingSignalsRef.current.push(signalData);
-        return;
       }
 
       let peer = peerRef.current;
@@ -637,13 +568,9 @@ export default function Room() {
     };
 
     const onConnect = () => {
-      console.log('[Socket] connected / reconnected');
+      console.log('[Socket] connected');
       setDisconnected(false);
       joinRoom();
-      // Re-broadcast mic state after reconnection so remote sees correct status
-      if (isMutedRef.current) {
-        socket.emit('participant-mic-muted', { roomId });
-      }
     };
 
     socket.on('room-state', onRoomState);
@@ -685,11 +612,6 @@ export default function Room() {
       socket.off('disconnect', onDisconnect);
       socket.off('connect', onConnect);
       destroyPeer('room component cleanup');
-      // Disconnect the socket so the server knows this user left the room.
-      // This is critical for SPA back-button navigation (beforeunload doesn't
-      // fire for in-app navigations). The socket is a singleton but calling
-      // disconnect() is safe — socket.connect() in the next mount reconnects
-      // it with a fresh socket ID.
       socket.disconnect();
     };
   }, [roomId, hasJoined, turnLoaded, initiatePeer, destroyPeer, setRemoteParticipant, navigate, syncLocalMicState, user.id, user.name, persistRoomState, clearRoomState]);
@@ -699,49 +621,14 @@ export default function Room() {
     syncLocalMicState(isMuted);
   }, [hasJoined, isMuted, syncLocalMicState]);
 
-  // Stop media tracks and destroy WebRTC on unmount
   useEffect(() => {
     return () => {
       if (localStreamRef.current) {
         localStreamRef.current.getTracks().forEach(t => t.stop());
-        localStreamRef.current = null;
       }
       destroyPeer('component unmounted');
     };
   }, [destroyPeer]);
-
-  // Handle browser back-button / page close without going through End Session.
-  // Gracefully disconnect the socket so the server emits `peer-left` immediately.
-  // Also detect back-forward cache (bfcache) pageshow and force reload to start clean.
-  useEffect(() => {
-    if (!hasJoined) return;
-
-    const handleBeforeUnload = () => {
-      // Use sendBeacon-compatible disconnect: tell socket to disconnect immediately
-      // so the server's disconnect handler fires fast instead of waiting for the
-      // socket timeout (which causes the stale-peer glitch on rejoin).
-      if (socket.connected) {
-        socket.disconnect();
-      }
-    };
-
-    const handlePageShow = (e) => {
-      if (e.persisted) {
-        console.log('[Bfcache] Page restored from back-forward cache, reloading for clean state...');
-        window.location.reload();
-      }
-    };
-
-    window.addEventListener('beforeunload', handleBeforeUnload);
-    window.addEventListener('pagehide', handleBeforeUnload);
-    window.addEventListener('pageshow', handlePageShow);
-
-    return () => {
-      window.removeEventListener('beforeunload', handleBeforeUnload);
-      window.removeEventListener('pagehide', handleBeforeUnload);
-      window.removeEventListener('pageshow', handlePageShow);
-    };
-  }, [hasJoined]);
 
   const handleEditorChange = useCallback((value) => {
     if (isRemoteChange.current) {
