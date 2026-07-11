@@ -2,7 +2,7 @@
 
 Conduct smarter interviews. Collaborate in real time.
 
-🌐 **Live Demo:** https://your-deployment-link.com
+🌐 **Live Demo:** interview-platform-rose.vercel.app
 
 InterviewApp is a collaborative technical interview platform that enables interviewers and candidates to conduct remote coding interviews with a synchronized code editor, shared whiteboard, WebRTC-based audio/video calls, and AI-generated interview reports powered by Google Gemini.
 
