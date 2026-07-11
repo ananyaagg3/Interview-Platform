@@ -2,7 +2,7 @@
 
 Conduct smarter interviews. Collaborate in real time.
 
-🌐 **Live Demo:** interview-platform-rose.vercel.app
+🌐 **Live Demo:** https://interview-platform-rose.vercel.app/login
 
 InterviewApp is a collaborative technical interview platform that enables interviewers and candidates to conduct remote coding interviews with a synchronized code editor, shared whiteboard, WebRTC-based audio/video calls, and AI-generated interview reports powered by Google Gemini.
 
@@ -65,8 +65,6 @@ Interview-Platform/
 |--------|-------|-------------|
 | POST | `/api/auth/signup` | Register a new user |
 | POST | `/api/auth/login` | Login user |
-| POST | `/api/auth/forgot-password` | Send password reset email |
-| POST | `/api/auth/reset-password` | Reset password |
 | GET | `/api/auth/me` | Get current user |
 | POST | `/api/rooms/create` | Create interview room |
 | GET | `/api/rooms/past` | Get previous interview sessions |
